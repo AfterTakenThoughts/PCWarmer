@@ -10,6 +10,11 @@ Keeps a list of in-progress items and items that should be done. Finished items 
 	- Still to do: max CPU temperature and max GPU temperature.
 		- They need temperature readings first. On Windows, GPU temperature on NVIDIA can come from `nvidia-smi` (no admin). CPU temperature needs a library such as LibreHardwareMonitorLib and running as administrator.
 		- Decide what the limits do: only show the numbers, or also stop warming when a reading goes over its limit.
+- Add a single option in the screensaver selection screen on hardware load: Default, None, Low, Medium, High.
+	- Move the settings button to the screensaver select screen.
+- Rename "Start warming" to "Start"
+- Improve the UI with certain animated assets.
+- Use a better button design.
 
 ### Claude items:
 
@@ -50,7 +55,7 @@ Engine work from [architecture-design.md](architecture-design.md) that the scree
 - Add stress settings and the frame-rate policy (Task 4)
 	- New `PCWarmerSettings` fields (screensaver, intensity, FPS cap, duration, CPU threads) that fall back to defaults on bad or missing values.
 	- `FpsCap` (30 / 60 / 144 / uncapped) and `FrameRatePolicy` to apply it.
-	- Done for CPU load, FPS cap, duration and CPU threads, with tests in `PCWarmerSettingsTests` and `FrameRatePolicyTests`. There's no screensaver-id setting yet, because there's only one screensaver.
+	- Done for CPU load, FPS cap, duration and CPU threads, with tests in `PCWarmerSettingsTests` and `FrameRatePolicyTests`. There's no screensaver-id setting: `ScreensaverPickerScreen` asks which of the four screensavers to run each time you start warming.
 - Build the screensaver engine (Task 5, everything except `ScreensaverScreen`)
 	- `IScreensaver`, `ScreensaverCatalog`, `EmissionBudget`, `FrameCounter` and the first screensaver, `ParticleStormScreensaver`.
 	- Plus Embers, Starfield and Bouncing Orbs. Tests are in `EmissionBudgetTests`, `FrameCounterTests`, `ScreensaverCatalogTests`, `EmberFieldTests`, `StarfieldTests` and `OrbFieldTests`.

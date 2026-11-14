@@ -319,15 +319,6 @@ namespace PCWarmer.Core.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to [ No ].
-        /// </summary>
-        internal static string NoButtonText {
-            get {
-                return ResourceManager.GetString("NoButtonText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Particle Effect: .
         /// </summary>
         internal static string ParticleEffect {
@@ -400,24 +391,6 @@ namespace PCWarmer.Core.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Show Virtual GamePad: .
-        /// </summary>
-        internal static string ShowVirtualGamePad {
-            get {
-                return ResourceManager.GetString("ShowVirtualGamePad", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Tap To Pause.
-        /// </summary>
-        internal static string TapToPause {
-            get {
-                return ResourceManager.GetString("TapToPause", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to TIME: .
         /// </summary>
         internal static string Time {
@@ -459,15 +432,6 @@ namespace PCWarmer.Core.Localization {
         internal static string YesButtonHelp {
             get {
                 return ResourceManager.GetString("YesButtonHelp", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to [ Yes ].
-        /// </summary>
-        internal static string YesButtonText {
-            get {
-                return ResourceManager.GetString("YesButtonText", resourceCulture);
             }
         }
         

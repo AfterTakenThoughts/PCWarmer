@@ -74,21 +74,6 @@ public class InputState
 
         LastKeyboardStates = new KeyboardState[MaxInputs];
         LastGamePadStates = new GamePadState[MaxInputs];
-
-        // Configure platform-specific input options
-        if (PCWarmerGame.IsMobile)
-        {
-            TouchPanel.EnabledGestures = GestureType.Tap;
-        }
-        else if (PCWarmerGame.IsDesktop)
-        {
-            // No desktop-specific initialization needed
-        }
-        else
-        {
-            // For now, we'll throw an exception if we don't know the platform
-            throw new PlatformNotSupportedException();
-        }
     }
 
     /// <summary>

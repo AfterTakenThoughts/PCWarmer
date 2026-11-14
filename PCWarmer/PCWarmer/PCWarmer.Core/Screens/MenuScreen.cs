@@ -65,32 +65,14 @@ abstract class MenuScreen : GameScreen
     {
         base.HandleInput(gameTime, inputState);
 
-        // Handle touch input for mobile platforms.
-        if (PCWarmerGame.IsMobile)
+        // Handle mouse input.
+        if (inputState.IsLeftMouseButtonClicked())
         {
-            var touchState = inputState.CurrentTouchState;
-            if (touchState.Count > 0)
-            {
-                foreach (var touch in touchState)
-                {
-                    if (touch.State == TouchLocationState.Pressed)
-                    {
-                        TextSelectedCheck(inputState.CurrentCursorLocation);
-                    }
-                }
-            }
+            TextSelectedCheck(inputState.CurrentCursorLocation);
         }
-        // Handle mouse input for desktop platforms.
-        else if (PCWarmerGame.IsDesktop)
+        else if (inputState.IsMiddleMouseButtonClicked())
         {
-            if (inputState.IsLeftMouseButtonClicked())
-            {
-                TextSelectedCheck(inputState.CurrentCursorLocation);
-            }
-            else if (inputState.IsMiddleMouseButtonClicked())
-            {
-                OnSelectEntry(selectedEntry, PlayerIndex.One);
-            }
+            OnSelectEntry(selectedEntry, PlayerIndex.One);
         }
 
         // Move to the previous menu entry.

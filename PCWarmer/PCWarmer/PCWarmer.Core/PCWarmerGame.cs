@@ -40,18 +40,8 @@ namespace PCWarmer.Core
         private ParticleManager particleManager;
 
         /// <summary>
-        /// Indicates if the game is running on a mobile platform.
-        /// </summary>
-        public readonly static bool IsMobile = OperatingSystem.IsAndroid() || OperatingSystem.IsIOS();
-
-        /// <summary>
-        /// Indicates if the game is running on a desktop platform.
-        /// </summary>
-        public readonly static bool IsDesktop = OperatingSystem.IsMacOS() || OperatingSystem.IsLinux() || OperatingSystem.IsWindows();
-
-        /// <summary>
-        /// Initializes a new instance of the game. Configures platform-specific settings, 
-        /// initializes services like settings and leaderboard managers, and sets up the 
+        /// Initializes a new instance of the game. Configures desktop settings,
+        /// initializes services like settings and leaderboard managers, and sets up the
         /// screen manager for screen transitions.
         /// </summary>
         public PCWarmerGame()
@@ -61,24 +51,10 @@ namespace PCWarmer.Core
             // Share GraphicsDeviceManager as a service.
             Services.AddService(typeof(GraphicsDeviceManager), graphicsDeviceManager);
 
-            // Determine the appropriate settings storage based on the platform.
-            ISettingsStorage storage;
-            if (IsMobile)
-            {
-                storage = new MobileSettingsStorage();
-                graphicsDeviceManager.IsFullScreen = true;
-                IsMouseVisible = false;
-            }
-            else if (IsDesktop)
-            {
-                storage = new DesktopSettingsStorage();
-                graphicsDeviceManager.IsFullScreen = false;
-                IsMouseVisible = true;
-            }
-            else
-            {
-                throw new PlatformNotSupportedException();
-            }
+            // PCWarmer is desktop only.
+            ISettingsStorage storage = new DesktopSettingsStorage();
+            graphicsDeviceManager.IsFullScreen = false;
+            IsMouseVisible = true;
 
             // Initialize settings and leaderboard managers.
             settingsManager = new SettingsManager<PCWarmerSettings>(storage);

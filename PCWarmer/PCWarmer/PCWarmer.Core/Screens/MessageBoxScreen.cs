@@ -18,11 +18,7 @@ class MessageBoxScreen : GameScreen
     private readonly bool toastMessage;
     private readonly TimeSpan toastDuration;
     private TimeSpan toastTimer;
-    private Vector2 yesButtonPosition;
-    private Vector2 noButtonPosition;
     private Vector2 messageTextPosition;
-    private Vector2 yesTextSize;
-    private Vector2 noTextSize;
     private Rectangle backgroundRectangle;
 
     /// <summary>
@@ -104,18 +100,14 @@ class MessageBoxScreen : GameScreen
         // controlling player, the InputState helper returns to us which player
         // actually provided the input. We pass that through to our Accepted and
         // Cancelled events, so they can tell which player triggered them.
-        if (inputState.IsMenuSelect(ControllingPlayer, out playerIndex)
-            || (PCWarmerGame.IsMobile
-            && inputState.IsUIClicked(new Rectangle((int)yesButtonPosition.X, (int)yesButtonPosition.Y, (int)yesTextSize.X, (int)yesTextSize.Y))))
+        if (inputState.IsMenuSelect(ControllingPlayer, out playerIndex))
         {
             // Raise the accepted event, then exit the message box.
             Accepted?.Invoke(this, new PlayerIndexEventArgs(playerIndex));
 
             ExitScreen();
         }
-        else if (inputState.IsMenuCancel(ControllingPlayer, out playerIndex)
-            || (PCWarmerGame.IsMobile
-            && inputState.IsUIClicked(new Rectangle((int)noButtonPosition.X, (int)noButtonPosition.Y, (int)noTextSize.X, (int)noTextSize.Y))))
+        else if (inputState.IsMenuCancel(ControllingPlayer, out playerIndex))
         {
             // Raise the cancelled event, then exit the message box.
             Cancelled?.Invoke(this, new PlayerIndexEventArgs(playerIndex));
@@ -153,27 +145,10 @@ class MessageBoxScreen : GameScreen
         Vector2 textSize = ScreenManager.Font.MeasureString(message);
         messageTextPosition = (ScreenManager.BaseScreenSize - textSize) / 2;
 
-        // Done here because language setting could change dynamically. Possibly overkill?
-        yesTextSize = ScreenManager.Font.MeasureString(Resources.YesButtonText);
-        noTextSize = ScreenManager.Font.MeasureString(Resources.NoButtonText);
-        if (PCWarmerGame.IsMobile
-            && !toastMessage)
-        {
-            textSize += yesTextSize;
-            textSize.Y += vPad * 2;
-        }
-
         backgroundRectangle = new Rectangle((int)messageTextPosition.X - hPad,
                                             (int)messageTextPosition.Y - vPad,
                                             (int)textSize.X + hPad * 2,
                                             (int)textSize.Y + vPad * 2);
-
-        if (PCWarmerGame.IsMobile
-            && !toastMessage)
-        {
-            yesButtonPosition = new Vector2(backgroundRectangle.X + backgroundRectangle.Width - (yesTextSize.X + hPad + noTextSize.X + hPad), backgroundRectangle.Y + backgroundRectangle.Height - yesTextSize.Y - vPad);
-            noButtonPosition = new Vector2(backgroundRectangle.X + backgroundRectangle.Width - (noTextSize.X + hPad), backgroundRectangle.Y + backgroundRectangle.Height - noTextSize.Y - vPad);
-        }
     }
 
     /// <summary>
@@ -198,16 +173,6 @@ class MessageBoxScreen : GameScreen
 
         // Draw the message box text.
         spriteBatch.DrawString(font, message, messageTextPosition, color);
-
-        if (PCWarmerGame.IsMobile
-            && !toastMessage)
-        {
-            color = Color.LimeGreen;
-            spriteBatch.DrawString(font, Resources.YesButtonText, yesButtonPosition, color);
-
-            color = Color.OrangeRed;
-            spriteBatch.DrawString(font, Resources.NoButtonText, noButtonPosition, color);
-        }
 
         spriteBatch.End();
     }

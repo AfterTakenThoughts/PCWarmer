@@ -91,9 +91,9 @@ namespace PCWarmer.Core
             var selectedLanguage = languages[settingsManager.Settings.Language].Name;
             LocalizationManager.SetCulture(selectedLanguage);
 
-            // Add background and main menu screens.
+            // Add the background and the start screen.
             screenManager.AddScreen(new BackgroundScreen(), null);
-            screenManager.AddScreen(new MainMenuScreen(), null);
+            screenManager.AddScreen(new StartScreen(), null);
         }
 
         /// <summary>

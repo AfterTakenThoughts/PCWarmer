@@ -535,7 +535,7 @@ namespace PCWarmer.Core
                 && !particlesExploding)
             {
                 particleManager.Position = Player.Position;
-                particleManager.Emit(100, SettingsScreen.CurrentParticleEffect);
+                particleManager.Emit(100, ParticleEffectType.Fireworks);
                 particlesExploding = true;
             }
 

@@ -1,6 +1,9 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using PCWarmer.Core.Display;
 using PCWarmer.Core.Effects;
+using PCWarmer.Core.Stress;
 
 namespace PCWarmer.Core.Settings;
 
@@ -14,6 +17,10 @@ public class PCWarmerSettings : INotifyPropertyChanged
     private bool fullScreen;
     private int language = 2; // Default to English for now
     private ParticleEffectType particleEffect;
+    private StressLevel cpuLoad = StressLevel.Medium;
+    private FpsCap fpsCap = FpsCap.Fps60;
+    private int durationMinutes;
+    private int cpuThreads;
 
     /// <summary>
     /// Gets or sets whether the game is in full-screen mode.
@@ -73,7 +80,44 @@ public class PCWarmerSettings : INotifyPropertyChanged
         }
     }
 
-    // Add more settings as needed
+    /// <summary>
+    /// How hard a warming run works the CPU: Low, Medium or High (see <see cref="StressProfile"/> for each level's duty cycle).
+    /// </summary>
+    public StressLevel CpuLoad
+    {
+        get => cpuLoad;
+        set => SetField(ref cpuLoad, value);
+    }
+
+    /// <summary>The screensaver's frame-rate cap. Higher means more GPU load.</summary>
+    public FpsCap FpsCap
+    {
+        get => fpsCap;
+        set => SetField(ref fpsCap, value);
+    }
+
+    /// <summary>How long a warming run lasts, in minutes. 0 means unlimited.</summary>
+    public int DurationMinutes
+    {
+        get => durationMinutes;
+        set => SetField(ref durationMinutes, value);
+    }
+
+    /// <summary>CPU worker threads for a warming run. 0 means one per core.</summary>
+    public int CpuThreads
+    {
+        get => cpuThreads;
+        set => SetField(ref cpuThreads, value);
+    }
+
+    private void SetField<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(field, value))
+            return;
+
+        field = value;
+        OnPropertyChanged(propertyName);
+    }
 
     /// <summary>
     /// Event triggered when a property value changes.

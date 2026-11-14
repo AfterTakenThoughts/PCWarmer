@@ -1,193 +1,89 @@
-using System.Collections.Generic;
-using System.Globalization;
-using PCWarmer.Core.Effects;
+using System;
 using PCWarmer.Core.Localization;
 using PCWarmer.Core.Settings;
-using PCWarmer.ScreenManagers;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace PCWarmer.Screens;
 
 /// <summary>
-/// The settings screen is brought up over the top of the main menu
-/// screen, and gives the user a chance to configure the game
-/// in various hopefully useful ways.
+/// Options for warming runs: how hard the CPU works (Low, Medium or High), the screensaver's frame-rate cap, how long a run lasts
+/// and how many CPU threads it uses, plus full-screen mode. Selecting an entry steps it to its next value,
+/// which is saved straight away.
 /// </summary>
 class SettingsScreen : MenuScreen
 {
-    private MenuEntry fullscreenMenuEntry;
-    private MenuEntry languageMenuEntry;
-    private MenuEntry particleEffectMenuEntry;
-    private MenuEntry backMenuEntry;
-    private static List<CultureInfo> languages;
-    private static int currentLanguage = 0;
+    private readonly MenuEntry fullscreenMenuEntry = new(string.Empty);
+    private readonly MenuEntry cpuLoadMenuEntry = new(string.Empty);
+    private readonly MenuEntry frameRateMenuEntry = new(string.Empty);
+    private readonly MenuEntry durationMenuEntry = new(string.Empty);
+    private readonly MenuEntry cpuThreadsMenuEntry = new(string.Empty);
+    private readonly MenuEntry backMenuEntry = new(string.Empty);
 
-    private GraphicsDeviceManager gdm;
-
-    private static ParticleEffectType currentParticleEffect = ParticleEffectType.Fireworks;
-    /// <summary>
-    /// Gets the currently selected particle effect type.
-    /// </summary>
-    public static ParticleEffectType CurrentParticleEffect { get => currentParticleEffect; }
-
+    private GraphicsDeviceManager graphics;
     private SettingsManager<PCWarmerSettings> settingsManager;
-    private ParticleManager particleManager;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="SettingsScreen"/> class.
-    /// </summary>
+    private PCWarmerSettings Settings => settingsManager.Settings;
+
     public SettingsScreen()
         : base(Resources.Settings)
     {
-        List<CultureInfo> cultures = LocalizationManager.GetSupportedCultures();
-        languages = new List<CultureInfo>();
-        for (int i = 0; i < cultures.Count; i++)
+        fullscreenMenuEntry.Selected += (s, e) => Change(() =>
         {
-            languages.Add(cultures[i]);
-        }
-
-        // Create our menu entries.
-        fullscreenMenuEntry = new MenuEntry(string.Empty);
-        languageMenuEntry = new MenuEntry(string.Empty);
-        particleEffectMenuEntry = new MenuEntry(string.Empty);
-        backMenuEntry = new MenuEntry(string.Empty);
-
-        // Hook up menu event handlers.
-        fullscreenMenuEntry.Selected += FullScreenMenuEntrySelected;
-        languageMenuEntry.Selected += LanguageMenuEntrySelected;
-        particleEffectMenuEntry.Selected += ParticleEffectMenuEntrySelected;
+            graphics.ToggleFullScreen();
+            Settings.FullScreen = graphics.IsFullScreen;
+        });
+        cpuLoadMenuEntry.Selected += (s, e) => Change(() => Settings.CpuLoad = SettingChoices.NextCpuLoad(Settings.CpuLoad));
+        frameRateMenuEntry.Selected += (s, e) => Change(() => Settings.FpsCap = SettingChoices.NextFpsCap(Settings.FpsCap));
+        durationMenuEntry.Selected += (s, e) => Change(() => Settings.DurationMinutes = SettingChoices.NextDuration(Settings.DurationMinutes));
+        cpuThreadsMenuEntry.Selected += (s, e) => Change(() => Settings.CpuThreads = SettingChoices.NextCpuThreads(Settings.CpuThreads, Environment.ProcessorCount));
         backMenuEntry.Selected += OnCancel;
 
-        // Add entries to the menu.
+        MenuEntries.Add(cpuLoadMenuEntry);
+        MenuEntries.Add(frameRateMenuEntry);
+        MenuEntries.Add(durationMenuEntry);
+        MenuEntries.Add(cpuThreadsMenuEntry);
         MenuEntries.Add(fullscreenMenuEntry);
-        MenuEntries.Add(languageMenuEntry);
-        MenuEntries.Add(particleEffectMenuEntry);
         MenuEntries.Add(backMenuEntry);
     }
 
-    /// <summary>
-    /// Loads content for the settings screen, including lazy loading services and setting initial values.
-    /// </summary>
     public override void LoadContent()
     {
         base.LoadContent();
 
-        // Lazy Load some things
-        gdm ??= ScreenManager.Game.Services.GetService<GraphicsDeviceManager>();
-
+        graphics ??= ScreenManager.Game.Services.GetService<GraphicsDeviceManager>();
         settingsManager ??= ScreenManager.Game.Services.GetService<SettingsManager<PCWarmerSettings>>();
 
-        settingsManager.Settings.PropertyChanged += (s, e) =>
-        {
-            SetLanguageText();
+        graphics.IsFullScreen = Settings.FullScreen;
 
-            settingsManager.Save();
-        };
-
-        currentLanguage = settingsManager.Settings.Language;
-        currentParticleEffect = settingsManager.Settings.ParticleEffect;
-        gdm.IsFullScreen = settingsManager.Settings.FullScreen;
-
-        SetLanguageText();
-
-        particleManager ??= ScreenManager.Game.Services.GetService<ParticleManager>();
+        RefreshText();
     }
 
-    /// <summary>
-    /// Updates the settings screen, including particle effects.
-    /// </summary>
-    /// <param name="gameTime">Provides a snapshot of timing values.</param>
-    /// <param name="otherScreenHasFocus">Indicates whether another screen has focus.</param>
-    /// <param name="coveredByOtherScreen">Indicates whether the screen is covered by another screen.</param>
-    public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
+    /// <summary>Applies a change to the settings, saves them and shows the new values.</summary>
+    private void Change(Action change)
     {
-        base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
-
-        particleManager.Update(gameTime);
+        change();
+        settingsManager.Save();
+        RefreshText();
     }
 
-    /// <summary>
-    /// Draws the settings screen, including particle effects.
-    /// </summary>
-    /// <param name="gameTime">Provides a snapshot of timing values.</param>
-    public override void Draw(GameTime gameTime)
+    private void RefreshText()
     {
-        SpriteBatch spriteBatch = ScreenManager.SpriteBatch;
+        // Show what a run will actually use, so a bad hand-edited value shows its fallback.
+        cpuLoadMenuEntry.Text = $"CPU Load: {SettingChoices.CpuLoadOrDefault(Settings.CpuLoad)}";
 
-        spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, ScreenManager.GlobalTransformation);
+        frameRateMenuEntry.Text = $"Frame Rate: {ScreensaverScreen.FpsCapText(Settings.FpsCap)}";
 
-        particleManager.Draw(spriteBatch);
+        durationMenuEntry.Text = SettingChoices.RunDuration(Settings.DurationMinutes) is { } duration
+            ? $"Duration: {duration.TotalMinutes:0} min"
+            : "Duration: Unlimited";
 
-        spriteBatch.End();
+        int threads = Settings.CpuThreads;
+        int cores = Environment.ProcessorCount;
+        cpuThreadsMenuEntry.Text = threads >= 1 && threads <= cores
+            ? $"CPU Threads: {threads}"
+            : $"CPU Threads: All Cores ({cores})";
 
-        base.Draw(gameTime);
-    }
-
-    /// <summary>
-    /// Fills in the latest values for the options screen menu text.
-    /// </summary>
-    private void SetLanguageText()
-    {
-        fullscreenMenuEntry.Text = string.Format(Resources.DisplayMode, gdm.IsFullScreen ? Resources.FullScreen : Resources.Windowed);
-
-        var selectedLanguage = languages[currentLanguage].DisplayName;
-        if (selectedLanguage.Contains("Invariant"))
-        {
-            selectedLanguage = Resources.English;
-        }
-        languageMenuEntry.Text = Resources.Language + selectedLanguage;
-
-        particleEffectMenuEntry.Text = Resources.ParticleEffect + currentParticleEffect;
-
+        fullscreenMenuEntry.Text = string.Format(Resources.DisplayMode, graphics.IsFullScreen ? Resources.FullScreen : Resources.Windowed);
         backMenuEntry.Text = Resources.Back;
-
-        Title = Resources.Settings;
-    }
-
-    /// <summary>
-    /// Event handler for when the Fullscreen menu entry is selected.
-    /// </summary>
-    /// <param name="sender">The source of the event.</param>
-    /// <param name="e">The <see cref="PlayerIndexEventArgs"/> instance containing the event data.</param>
-    private void FullScreenMenuEntrySelected(object sender, PlayerIndexEventArgs e)
-    {
-        gdm.ToggleFullScreen();
-
-        settingsManager.Settings.FullScreen = gdm.IsFullScreen;
-    }
-
-    /// <summary>
-    /// Event handler for when the Language menu entry is selected.
-    /// </summary>
-    /// <param name="sender">The source of the event.</param>
-    /// <param name="e">The <see cref="PlayerIndexEventArgs"/> instance containing the event data.</param>
-    private void LanguageMenuEntrySelected(object sender, PlayerIndexEventArgs e)
-    {
-        currentLanguage = (currentLanguage + 1) % languages.Count;
-
-        var selectedLanguage = languages[currentLanguage].Name;
-        LocalizationManager.SetCulture(selectedLanguage);
-
-        settingsManager.Settings.Language = currentLanguage;
-    }
-
-    /// <summary>
-    /// Event handler for when the Particle menu entry is selected.
-    /// </summary>
-    /// <param name="sender">The source of the event.</param>
-    /// <param name="e">The <see cref="PlayerIndexEventArgs"/> instance containing the event data.</param>
-    private void ParticleEffectMenuEntrySelected(object sender, PlayerIndexEventArgs e)
-    {
-        currentParticleEffect++;
-
-        if (currentParticleEffect > ParticleEffectType.Sparkles)
-        {
-            currentParticleEffect = 0;
-        }
-
-        settingsManager.Settings.ParticleEffect = currentParticleEffect;
-
-        particleManager.Emit(100, currentParticleEffect);  // Emit 100 particles
     }
 }

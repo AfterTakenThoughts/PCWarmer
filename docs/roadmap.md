@@ -12,7 +12,7 @@ Keeps a list of in-progress items and items that should be done. Finished items 
 		- Decide what the limits do: only show the numbers, or also stop warming when a reading goes over its limit.
 - Add a single option in the screensaver selection screen on hardware load: Default, None, Low, Medium, High.
 	- Move the settings button to the screensaver select screen.
-- Rename "Start warming" to "Start"
+	- Only show the settings button when selecting "Custom".
 - Improve the UI with certain animated assets.
 - Use a better button design.
 
@@ -29,7 +29,9 @@ Engine work from [architecture-design.md](architecture-design.md) that the scree
 
 - Build a starting screen
 	- Add a button to start warming the room.
-	- `StartScreen` replaces the template main menu at startup. Start Warming opens `ScreensaverPickerScreen` (Particle Storm, Embers, Starfield, Bouncing Orbs). Picking one asks "Really warm your room?", and yes starts the run with the saved settings.
+	- `StartScreen` replaces the template main menu at startup. Start opens `ScreensaverPickerScreen` (Particle Storm, Embers, Starfield, Bouncing Orbs). Picking one asks "Really warm your room?", and yes starts the run with the saved settings.
+- Rename "Start warming" to "Start"
+	- The start screen's button now reads "Start", so it fits the student user story as well as the room-warming one.
 - Build a settings screen (separately)
 	- CPU load (Low / Medium / High: each core busy 25%, 60% or 100% of the time), frame rate (30 / 60 / 144 / uncapped), duration (unlimited / 15 / 30 / 60 / 120 min), CPU threads (all cores or 1 to the core count) and full screen. Each change is saved straight away, and bad saved values fall back to defaults (`SettingChoices`, with tests). The template's language and particle-effect options were removed.
 	- Max CPU and GPU temperature are still open (see [User items](#user-items)).

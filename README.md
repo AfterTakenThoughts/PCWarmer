@@ -33,7 +33,7 @@ This software comes with no warranty (see [LICENSE](LICENSE)). If you actually n
 
    The first build downloads the MonoGame content tools, so it can take a minute.
 3. *(Optional)* Open **Settings** to change the CPU load, frame-rate cap, run length, CPU threads or display mode. The defaults are Medium load, 60 fps, a 30-minute run, all CPU cores and full screen.
-4. Choose **Start Warming**, pick a screensaver (Particle Storm, Embers, Starfield or Bouncing Orbs), and confirm.
+4. Choose **Start**, pick a screensaver (Particle Storm, Embers, Starfield or Bouncing Orbs), and confirm.
 5. Press any key to stop. The run also stops on its own when the run length is up.
 
 See [Running the project](#running-the-project) for VS Code launch configurations and Release builds.

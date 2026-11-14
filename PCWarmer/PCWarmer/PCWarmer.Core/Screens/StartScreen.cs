@@ -12,7 +12,7 @@ class StartScreen : MenuScreen
     public StartScreen()
         : base("PCWarmer")
     {
-        MenuEntry warmMenuEntry = new MenuEntry("Start Warming");
+        MenuEntry warmMenuEntry = new MenuEntry("Start");
         MenuEntry settingsMenuEntry = new MenuEntry(Resources.Settings);
         MenuEntry exitMenuEntry = new MenuEntry(Resources.Exit);
 

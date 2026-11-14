@@ -8,6 +8,36 @@ PCWarmer holds a series of graphically intensive screensavers, with frame rate o
 
 > **Status:** in development for HackUMass XIV. The app currently builds and runs from the MonoGame starter template; the features below are the plan.
 
+## Before using this software
+
+PCWarmer is specifically designed to push a computer to its absolute limits. Before running it:
+
+- Make sure your computer has good airflow.
+- Keep an eye on temperatures and make sure your computer can handle running hot.
+- Don't leave it running unattended for long periods. By default a run stops on its own after 30 minutes; you can change this in Settings, including setting it to unlimited.
+- Plug your laptop charger in; laptops on battery will drain quickly.
+
+The screensaver opens full-screen by default. Press any key to stop the run and return to the menu.
+
+This software comes with no warranty (see [LICENSE](LICENSE)). If you actually need to heat a room, use a real heater instead. This project is the funnier option.
+
+## Quick start
+
+1. Install the [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0).
+2. Clone this repo, then build and run the desktop app:
+
+   ```bash
+   cd PCWarmer/PCWarmer
+   dotnet run --project PCWarmer.DesktopGL
+   ```
+
+   The first build downloads the MonoGame content tools, so it can take a minute.
+3. *(Optional)* Open **Settings** to change the CPU load, frame-rate cap, run length, CPU threads or display mode. The defaults are Medium load, 60 fps, a 30-minute run, all CPU cores and full screen.
+4. Choose **Start Warming**, pick a screensaver (Particle Storm, Embers, Starfield or Bouncing Orbs), and confirm.
+5. Press any key to stop. The run also stops on its own when the run length is up.
+
+See [Running the project](#running-the-project) for VS Code launch configurations and Release builds.
+
 ## What it will do
 
 ### GPU warmers: screensavers
@@ -31,10 +61,6 @@ Computationally intensive workloads that put your processor to work, so the GPU 
 - **Students and idle PCs.** Give your computer something to do while it sits on, so you can focus on class.
 
 More detail is in [docs/user-stories.md](docs/user-stories.md).
-
-## A word of caution
-
-PCWarmer deliberately pushes your hardware hard. Make sure your computer has good airflow, keep an eye on temperatures, and don't leave it running unattended for long periods. Laptops on battery will drain quickly. A real heater is the more efficient choice; this is the funnier one.
 
 ## Built with
 
@@ -72,4 +98,4 @@ In VS Code with the C# Dev Kit, the tests also show up in the Testing panel (Tes
 
 ## License
 
-See [LICENSE](LICENSE).
+This project is under MIT. See [LICENSE](LICENSE) for details.

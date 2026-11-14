@@ -272,16 +272,7 @@ partial class GameplayScreen : GameScreen
         // on PC if they are playing with a keyboard and have no gamepad at all!
         bool gamePadDisconnected = !currentGamePadState.IsConnected && previousGamePadState.IsConnected;
 
-        Rectangle? backpackTouched = null;
-        if (PCWarmerGame.IsMobile)
-        {
-            backpackTouched = new Rectangle((int)level.BackpackPosition.X,
-                (int)level.BackpackPosition.Y,
-                (int)level.BackpackPosition.X + 32,
-                (int)level.BackpackPosition.Y + 32);
-        }
-
-        if (inputState.IsPauseGame(ControllingPlayer, backpackTouched)
+        if (inputState.IsPauseGame(ControllingPlayer)
                 || gamePadDisconnected)
         {
             ScreenManager.AddScreen(new PauseScreen(), ControllingPlayer);

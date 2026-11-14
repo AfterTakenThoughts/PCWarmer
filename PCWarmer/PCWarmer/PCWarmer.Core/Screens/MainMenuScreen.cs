@@ -180,21 +180,10 @@ class MainMenuScreen : MenuScreen
             tutorialStep++;
             timeSinceLastMessage = gameTime.TotalGameTime;
 
-            if (PCWarmerGame.IsMobile)
+            if (tutorialStep > 2)
             {
-                if (tutorialStep > 3)
-                {
-                    tutorialStep = -1;
-                    showTutorial = false;
-                }
-            }
-            else
-            {
-                if (tutorialStep > 2)
-                {
-                    tutorialStep = -1;
-                    showTutorial = false;
-                }
+                tutorialStep = -1;
+                showTutorial = false;
             }
         }
     }
@@ -257,15 +246,6 @@ class MainMenuScreen : MenuScreen
                 textSize = font.MeasureString(message);
                 backgroundRectangle = new Rectangle((int)level.Player.Position.X - (int)(textSize.X /2) - hPad,
                                                       (int)level.Player.Position.Y - vPad - 100,
-                                                      (int)textSize.X + hPad * 2,
-                                                      (int)textSize.Y + vPad * 2);
-                break;
-
-            case 3:
-                message = Resources.TapToPause;
-                textSize = font.MeasureString(message);
-                backgroundRectangle = new Rectangle((int)level.BackpackPosition.X + hPad + 4,
-                                                      (int)level.BackpackPosition.Y - 10,
                                                       (int)textSize.X + hPad * 2,
                                                       (int)textSize.Y + vPad * 2);
                 break;

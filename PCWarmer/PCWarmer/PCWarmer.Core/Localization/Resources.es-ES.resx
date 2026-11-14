@@ -189,12 +189,6 @@
   <data name="About" xml:space="preserve">
     <value>Acerca de</value>
   </data>
-  <data name="NoButtonText" xml:space="preserve">
-    <value>[ No ]</value>
-  </data>
-  <data name="YesButtonText" xml:space="preserve">
-    <value>[ Sí ]</value>
-  </data>
   <data name="DisplayMode" xml:space="preserve">
     <value>Modo de Pantalla: {0}</value>
   </data>
@@ -246,16 +240,10 @@
   <data name="NewHighScore" xml:space="preserve">
     <value>¡FELICITACIONES! Has conseguido un nuevo récord.</value>
   </data>
-  <data name="ShowVirtualGamePad" xml:space="preserve">
-    <value>Mostrar GamePad virtual: </value>
-  </data>
   <data name="YesButtonHelp" xml:space="preserve">
     <value>Sí = Botón A, Espacio, Enter</value>
   </data>
   <data name="NoButtonHelp" xml:space="preserve">
     <value>No = Botón B, Esc</value>
-  </data>
-  <data name="TapToPause" xml:space="preserve">
-    <value>Toca para pausar</value>
   </data>
 </root>

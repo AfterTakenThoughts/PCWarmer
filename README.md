@@ -55,6 +55,21 @@ The first build restores the MonoGame content tools automatically, which may tak
 
 In VS Code, open the repo root and use the **PCWarmer Debug** or **PCWarmer Release** launch configurations (F5). Use Release when you want maximum heat.
 
+## Running the tests
+
+Unit tests live in `PCWarmer/PCWarmer/PCWarmer.Tests` and use NUnit 4. Run them with:
+
+```bash
+cd PCWarmer/PCWarmer
+dotnet test PCWarmer.Tests/PCWarmer.Tests.csproj
+```
+
+`dotnet test` builds the project first. A plain `dotnet build` only compiles the tests and never runs them.
+
+To run a subset, add a filter, for example `dotnet test PCWarmer.Tests/PCWarmer.Tests.csproj --filter "FullyQualifiedName~DivergentSeries"`.
+
+In VS Code with the C# Dev Kit, the tests also show up in the Testing panel (Test Explorer). It only finds tests in projects that are part of `PCWarmer.sln`, so add any new test project to the solution.
+
 ## License
 
 See [LICENSE](LICENSE).

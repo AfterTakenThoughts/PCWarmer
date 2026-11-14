@@ -1,0 +1,26 @@
+{
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/dotnet:2": {
+      "version": "8.0"
+    },
+    "ghcr.io/devcontainers/features/node:1": {},
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1.0": {}
+  },
+  "customizations": {
+    "vscode": {
+      // NUnit tests run in VS Code's Test Explorer through C# Dev Kit, which discovers them via the
+      // NUnit3TestAdapter package in PCWarmer.Tests. Don't add legacy test-explorer adapters
+      // (hbenl.vscode-test-explorer, formulahendry.dotnet-test-explorer); they duplicate Dev Kit's tests.
+      "extensions": [
+        "anthropic.claude-code",
+        "ms-dotnettools.csdevkit",
+        "ms-dotnettools.csharp",
+        "ms-dotnettools.vscode-dotnet-runtime"
+      ],
+      "settings": {
+        "dotnet.defaultSolution": "PCWarmer/PCWarmer/PCWarmer.sln"
+      }
+    }
+  }
+}

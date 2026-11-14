@@ -22,9 +22,12 @@ dotnet tool restore && dotnet mgcb-editor                      # GUI editor for 
 ```
 
 - Target: .NET 8, MonoGame 3.8.x (`3.8.*` packages; MGCB tools pinned to 3.8.4 in `.config/dotnet-tools.json`). Platform projects run `dotnet tool restore` automatically before build.
-- `dotnet build PCWarmer.sln` builds Core, DesktopGL and WindowsDX. WindowsDX targets `net8.0-windows` and only builds on Windows.
+- `dotnet build PCWarmer.sln` builds Core, DesktopGL, WindowsDX and Tests. WindowsDX targets `net8.0-windows` and only builds on Windows, so a full solution build fails on Linux (including this dev container).
 - VS Code: the root `.vscode/launch.json` has **PCWarmer Debug** and **PCWarmer Release** configurations, which use the `build-desktopgl-debug` / `build-desktopgl-release` tasks in `.vscode/tasks.json`.
-- There are no test projects and no linter configured.
+- Tests: `dotnet test PCWarmer.Tests/PCWarmer.Tests.csproj` (NUnit 4, `Assert.That` constraint style). There is no linter configured.
+  - `PCWarmer.Tests` is part of `PCWarmer.sln`. Keep every test project in the solution, because C# Dev Kit's Test Explorer only discovers tests in projects that belong to the loaded solution.
+  - `dotnet build` only compiles the tests. It never runs them, and that is deliberate: don't hook test runs into the build (the IDE and the launch configurations build often). Run them with `dotnet test`, which builds first.
+- **Dev container limitation:** this container can only run the tests, not the game itself. Verify changes with `dotnet test`; don't try to `dotnet run` the app or rely on the DesktopGL build here. Running the app has to happen on a desktop machine outside the container.
 
 ## Architecture
 

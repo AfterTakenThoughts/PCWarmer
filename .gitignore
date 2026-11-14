@@ -1,24 +1,65 @@
-# Compiled class file
-*.class
+#OS junk files
+[Tt]humbs.db
+*.DS_Store
 
-# Log file
+#Visual Studio files
+*.pidb
+*.userprefs
+*.[Oo]bj
+*.exe
+*.pdb
+*.user
+*.aps
+*.pch
+*.vspscc
+*.vssscc
+*_i.c
+*_p.c
+*.ncb
+*.suo
+*.tlb
+*.tlh
+*.bak
+*.[Cc]ache
+*.ilk
 *.log
+*.lib
+*.sbr
+*.sdf
+*.lock
+*.ide
+*.ide-shm
+*.ide-wal
+ipch/
+obj/
+[Bb]in
+[Dd]ebug*/
+[Rr]elease*/
+Ankh.NoLoad
 
-# BlueJ files
-*.ctxt
+#Tooling
+_ReSharper*/
+*.resharper
+[Tt]est[Rr]esult*
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
+#Project files
+[Bb]uild/
 
-# Package Files #
-*.jar
-*.war
-*.nar
-*.ear
-*.zip
-*.tar.gz
-*.rar
+#Subversion files
+.svn
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-replay_pid*
+# Office Temp Files
+~$*
+
+#monodroid private beta
+monodroid*.msi
+/CompiledContent/Android/IgnoreMe.dll
+/CompiledContent/OSX/IgnoreMe.dll
+/CompiledContent/Windows8/IgnoreMe.dll
+/CompiledContent/Windows/IgnoreMe.dll
+*.cachefile
+*.dll
+*.VC.db
+*.VC.opendb
+
+artifacts/

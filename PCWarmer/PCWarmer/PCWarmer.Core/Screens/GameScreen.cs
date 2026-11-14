@@ -13,7 +13,7 @@ namespace PCWarmer.Screens;
 /// want to quit" message box, and the main game itself are all implemented
 /// as screens.
 /// </summary>
-public abstract class GameScreen
+public abstract class GameScreen : IScreen
 {
     private bool isPopup = false;
     /// <summary>

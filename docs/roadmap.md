@@ -1,40 +1,56 @@
-## User items:
+# Roadmap
 
-- Build a starting screen
-	- Add a button to start warming the room.
-	- Done: `StartScreen` replaces the template main menu at startup. Start Warming opens `ScreensaverPickerScreen` (Particle Storm, Embers, Starfield, Bouncing Orbs). Picking one asks "Really warm your room?", and yes starts the run with the saved settings.
+Keeps a list of in-progress items and items that should be done. Finished items are under [Done](#done).
+
+## In-Progress
+
+### User items:
+
 - Build a settings screen (separately)
-	- Done: CPU load (Low / Medium / High: each core busy 25%, 60% or 100% of the time), frame rate (30 / 60 / 144 / uncapped), duration (unlimited / 15 / 30 / 60 / 120 min), CPU threads (all cores or 1 to the core count) and full screen. Each change is saved straight away, and bad saved values fall back to defaults (`SettingChoices`, with tests). The template's language and particle-effect options were removed.
 	- Still to do: max CPU temperature and max GPU temperature.
 		- They need temperature readings first. On Windows, GPU temperature on NVIDIA can come from `nvidia-smi` (no admin). CPU temperature needs a library such as LibreHardwareMonitorLib and running as administrator.
 		- Decide what the limits do: only show the numbers, or also stop warming when a reading goes over its limit.
-- Build the screensaver screen
-	- Done: `ScreensaverScreen` hosts `ParticleStormScreensaver` with a HUD (FPS, level, CPU load and threads, particles, time warming). Any key, click or gamepad button stops the run. It keeps rendering when the window is unfocused.
-	- Uses the saved CPU load, threads, duration and frame-rate cap. It ends on its own when the duration is up.
-	- Four screensavers in `ScreensaverCatalog`. Their motion (`EmberField`, `Starfield`, `OrbField`) is tested without a GPU.
 
-## Claude items:
+### Claude items:
 
 Engine work from [architecture-design.md](architecture-design.md) that the screens above build on. The screens themselves (start, settings and screensaver) stay in the user items.
 
+- Remove the platformer template (Task 7)
+	- Delete `Game/`, `GameplayScreen`, the leaderboard and the level content, then update `CLAUDE.md`.
+
+## Done
+
+### User items
+
+- Build a starting screen
+	- Add a button to start warming the room.
+	- `StartScreen` replaces the template main menu at startup. Start Warming opens `ScreensaverPickerScreen` (Particle Storm, Embers, Starfield, Bouncing Orbs). Picking one asks "Really warm your room?", and yes starts the run with the saved settings.
+- Build a settings screen (separately)
+	- CPU load (Low / Medium / High: each core busy 25%, 60% or 100% of the time), frame rate (30 / 60 / 144 / uncapped), duration (unlimited / 15 / 30 / 60 / 120 min), CPU threads (all cores or 1 to the core count) and full screen. Each change is saved straight away, and bad saved values fall back to defaults (`SettingChoices`, with tests). The template's language and particle-effect options were removed.
+	- Max CPU and GPU temperature are still open (see [User items](#user-items)).
+- Build the screensaver screen
+	- `ScreensaverScreen` hosts `ParticleStormScreensaver` with a HUD (FPS, level, CPU load and threads, particles, time warming). Any key, click or gamepad button stops the run. It keeps rendering when the window is unfocused.
+	- Uses the saved CPU load, threads, duration and frame-rate cap. It ends on its own when the duration is up.
+	- Four screensavers in `ScreensaverCatalog`. Their motion (`EmberField`, `Starfield`, `OrbField`) is tested without a GPU.
+
+### Claude items
+
 - Set up the test project
-	- Done: `PCWarmer.Tests` (NUnit) is in `PCWarmer.sln`, with tests for `DivergentSeries`.
+	- `PCWarmer.Tests` (NUnit) is in `PCWarmer.sln`, with tests for `DivergentSeries`.
 - Add stress levels (Task 1)
 	- `StressLevel` (Low / Medium / High) and `StressProfile` with each level's CPU duty cycle, particle rate and particle cap.
-	- Done, with tests in `StressProfileTests`.
+	- Tests in `StressProfileTests`.
 - Build the CPU stress service (Task 2)
 	- Background worker threads that burn CPU at the level's duty cycle, with a thread count clamped to 1 through the core count.
 	- Every worker stops when the run ends or the app closes.
-	- Done, with tests in `CpuStressServiceTests`.
+	- Tests in `CpuStressServiceTests`.
 - Build the stress session (Task 3)
 	- One warming run: start/stop, plus elapsed and remaining time measured on the wall clock so it keeps counting when the window is minimized.
-	- Done, with tests in `StressSessionTests`. It takes a CPU duty cycle (from the CPU load level's `StressProfile`).
+	- Tests in `StressSessionTests`. It takes a CPU duty cycle (from the CPU load level's `StressProfile`).
 - Add stress settings and the frame-rate policy (Task 4)
 	- New `PCWarmerSettings` fields (screensaver, intensity, FPS cap, duration, CPU threads) that fall back to defaults on bad or missing values.
 	- `FpsCap` (30 / 60 / 144 / uncapped) and `FrameRatePolicy` to apply it.
 	- Done for CPU load, FPS cap, duration and CPU threads, with tests in `PCWarmerSettingsTests` and `FrameRatePolicyTests`. There's no screensaver-id setting yet, because there's only one screensaver.
 - Build the screensaver engine (Task 5, everything except `ScreensaverScreen`)
 	- `IScreensaver`, `ScreensaverCatalog`, `EmissionBudget`, `FrameCounter` and the first screensaver, `ParticleStormScreensaver`.
-	- Done, plus Embers, Starfield and Bouncing Orbs. Tests are in `EmissionBudgetTests`, `FrameCounterTests`, `ScreensaverCatalogTests`, `EmberFieldTests`, `StarfieldTests` and `OrbFieldTests`.
-- Remove the platformer template (Task 7)
-	- Delete `Game/`, `GameplayScreen`, the leaderboard and the level content, then update `CLAUDE.md`.
+	- Plus Embers, Starfield and Bouncing Orbs. Tests are in `EmissionBudgetTests`, `FrameCounterTests`, `ScreensaverCatalogTests`, `EmberFieldTests`, `StarfieldTests` and `OrbFieldTests`.

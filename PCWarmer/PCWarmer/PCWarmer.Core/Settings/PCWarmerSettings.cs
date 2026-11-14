@@ -14,12 +14,12 @@ namespace PCWarmer.Core.Settings;
 /// </summary>
 public class PCWarmerSettings : INotifyPropertyChanged
 {
-    private bool fullScreen;
+    private bool fullScreen = true;
     private int language = 2; // Default to English for now
-    private ParticleEffectType particleEffect;
+    private ParticleEffectType particleEffect = ParticleEffectType.Fireworks;
     private StressLevel cpuLoad = StressLevel.Medium;
     private FpsCap fpsCap = FpsCap.Fps60;
-    private int durationMinutes;
+    private int durationMinutes = 30;
     private int cpuThreads;
 
     /// <summary>
@@ -96,7 +96,7 @@ public class PCWarmerSettings : INotifyPropertyChanged
         set => SetField(ref fpsCap, value);
     }
 
-    /// <summary>How long a warming run lasts, in minutes. 0 means unlimited.</summary>
+    /// <summary>How long a warming run lasts, in minutes. 0 means unlimited. Defaults to 30 so a forgotten run stops on its own.</summary>
     public int DurationMinutes
     {
         get => durationMinutes;

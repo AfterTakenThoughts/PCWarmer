@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using PCWarmer.Core.Effects;
@@ -53,11 +53,11 @@ namespace PCWarmer.Core
 
             // PCWarmer is desktop only.
             ISettingsStorage storage = new DesktopSettingsStorage();
-            graphicsDeviceManager.IsFullScreen = false;
             IsMouseVisible = true;
 
             // Initialize settings and leaderboard managers.
             settingsManager = new SettingsManager<PCWarmerSettings>(storage);
+            graphicsDeviceManager.IsFullScreen = settingsManager.Settings.FullScreen;
             Services.AddService(typeof(SettingsManager<PCWarmerSettings>), settingsManager);
 
             leaderboardManager = new SettingsManager<PCWarmerLeaderboard>(storage);

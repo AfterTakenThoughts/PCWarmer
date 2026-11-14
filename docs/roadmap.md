@@ -10,9 +10,6 @@ Keeps a list of in-progress items and items that should be done. Finished items 
 	- Still to do: max CPU temperature and max GPU temperature.
 		- They need temperature readings first. On Windows, GPU temperature on NVIDIA can come from `nvidia-smi` (no admin). CPU temperature needs a library such as LibreHardwareMonitorLib and running as administrator.
 		- Decide what the limits do: only show the numbers, or also stop warming when a reading goes over its limit.
-- Add a single option in the screensaver selection screen on hardware load: Default, None, Low, Medium, High.
-	- Move the settings button to the screensaver select screen.
-	- Only show the settings button when selecting "Custom".
 - Improve the UI with certain animated assets.
 - Use a better button design.
 
@@ -35,6 +32,9 @@ Engine work from [architecture-design.md](architecture-design.md) that the scree
 - Build a settings screen (separately)
 	- CPU load (Low / Medium / High: each core busy 25%, 60% or 100% of the time), frame rate (30 / 60 / 144 / uncapped), duration (unlimited / 15 / 30 / 60 / 120 min), CPU threads (all cores or 1 to the core count) and full screen. Each change is saved straight away, and bad saved values fall back to defaults (`SettingChoices`, with tests). The template's language and particle-effect options were removed.
 	- Max CPU and GPU temperature are still open (see [User items](#user-items)).
+- Add a hardware load option to the screensaver selection screen: Custom, None, Low, Medium, High
+	- None, Low, Medium and High are presets for CPU load, frame rate and screensaver particles (`RunPlan`, with tests); Custom uses the settings screen.
+	- The settings button moved from the start screen to the screensaver select screen, and only shows when "Custom" is selected.
 - Build the screensaver screen
 	- `ScreensaverScreen` hosts `ParticleStormScreensaver` with a HUD (FPS, level, CPU load and threads, particles, time warming). Any key, click or gamepad button stops the run. It keeps rendering when the window is unfocused.
 	- Uses the saved CPU load, threads, duration and frame-rate cap. It ends on its own when the duration is up.

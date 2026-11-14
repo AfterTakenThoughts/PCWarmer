@@ -70,4 +70,70 @@ public class PCWarmerSettingsTests
         Assert.That(settings.CpuLoad, Is.EqualTo(StressLevel.Medium));
         Assert.That(settings.DurationMinutes, Is.EqualTo(30));
     }
+
+    [Test]
+    public void ResetToDefaults_RestoresEveryOptionOnTheSettingsScreen()
+    {
+        var settings = new PCWarmerSettings
+        {
+            CpuLoad = StressLevel.High,
+            FpsCap = FpsCap.Uncapped,
+            DurationMinutes = 120,
+            CpuThreads = 3,
+            FullScreen = false,
+        };
+
+        settings.ResetToDefaults();
+
+        Assert.That(settings.CpuLoad, Is.EqualTo(StressLevel.Medium));
+        Assert.That(settings.FpsCap, Is.EqualTo(FpsCap.Fps60));
+        Assert.That(settings.DurationMinutes, Is.EqualTo(30));
+        Assert.That(settings.CpuThreads, Is.EqualTo(0));
+        Assert.That(settings.FullScreen, Is.True);
+    }
+
+    [Test]
+    public void ResetToDefaults_LeavesTheLanguageAlone()
+    {
+        // Language isn't on the settings screen; resetting it would switch the UI culture behind the user's back.
+        var settings = new PCWarmerSettings { Language = 0 };
+
+        settings.ResetToDefaults();
+
+        Assert.That(settings.Language, Is.EqualTo(0));
+    }
+
+    [Test]
+    public void ResetToDefaults_ReportsEachChangedSetting()
+    {
+        var settings = new PCWarmerSettings { CpuLoad = StressLevel.High, DurationMinutes = 60 };
+        var changed = new List<string?>();
+        settings.PropertyChanged += (_, e) => changed.Add(e.PropertyName);
+
+        settings.ResetToDefaults();
+
+        Assert.That(changed, Is.EquivalentTo(new[] { "CpuLoad", "DurationMinutes" }));
+    }
+
+    [Test]
+    public void HardwareLoad_DefaultsToMediumAndSurvivesSaveAndLoad()
+    {
+        Assert.That(new PCWarmerSettings().HardwareLoad, Is.EqualTo(HardwareLoad.Medium));
+
+        var loaded = JsonSerializer.Deserialize<PCWarmerSettings>(
+            JsonSerializer.Serialize(new PCWarmerSettings { HardwareLoad = HardwareLoad.Custom }))!;
+
+        Assert.That(loaded.HardwareLoad, Is.EqualTo(HardwareLoad.Custom));
+    }
+
+    [Test]
+    public void ResetToDefaults_LeavesTheHardwareLoadAlone()
+    {
+        // The hardware load is picked on the screensaver screen, not the settings screen.
+        var settings = new PCWarmerSettings { HardwareLoad = HardwareLoad.Custom };
+
+        settings.ResetToDefaults();
+
+        Assert.That(settings.HardwareLoad, Is.EqualTo(HardwareLoad.Custom));
+    }
 }

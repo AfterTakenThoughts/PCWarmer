@@ -25,6 +25,7 @@ class ScreensaverScreen : GameScreen
     private readonly StressSession session;
     private readonly IScreensaver screensaver;
     private readonly FpsCap fpsCap;
+    private readonly bool fullScreen;
     private readonly FrameCounter frameCounter = new();
     private readonly StringBuilder hud = new();
 
@@ -33,15 +34,18 @@ class ScreensaverScreen : GameScreen
     private bool savedIsFixedTimeStep;
     private TimeSpan savedTargetElapsedTime;
     private bool savedVSync;
+    private DisplaySettings savedDisplay;
 
     /// <param name="session">A started run. This screen stops and disposes it when it closes.</param>
     /// <param name="screensaver">The graphics load to show. This screen loads and unloads it.</param>
     /// <param name="fpsCap">The frame-rate cap while this screen is open. The previous frame rate comes back when it closes.</param>
-    public ScreensaverScreen(StressSession session, IScreensaver screensaver, FpsCap fpsCap)
+    /// <param name="fullScreen">Whether to cover the screen (borderless, at the desktop resolution) while this screen is open.</param>
+    public ScreensaverScreen(StressSession session, IScreensaver screensaver, FpsCap fpsCap, bool fullScreen)
     {
         this.session = session ?? throw new ArgumentNullException(nameof(session));
         this.screensaver = screensaver ?? throw new ArgumentNullException(nameof(screensaver));
         this.fpsCap = fpsCap;
+        this.fullScreen = fullScreen;
 
         TransitionOnTime = TimeSpan.FromSeconds(0.5);
         TransitionOffTime = TimeSpan.FromSeconds(0.5);
@@ -63,15 +67,24 @@ class ScreensaverScreen : GameScreen
         savedIsFixedTimeStep = game.IsFixedTimeStep;
         savedTargetElapsedTime = game.TargetElapsedTime;
         savedVSync = graphics.SynchronizeWithVerticalRetrace;
-        ApplyFrameRate(FrameRatePolicy.For(fpsCap));
+        savedDisplay = new DisplaySettings(
+            graphics.IsFullScreen,
+            graphics.HardwareModeSwitch,
+            new Point(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight));
 
+        DisplayMode desktop = ScreenManager.GraphicsDevice.Adapter.CurrentDisplayMode;
+        ApplyGraphics(
+            FrameRatePolicy.For(fpsCap),
+            ScreensaverDisplay.For(fullScreen, new Point(desktop.Width, desktop.Height), savedDisplay.BackBufferSize));
+
+        // Load after the display change, so the screensaver lays itself out for the full-screen size.
         screensaver.LoadContent(content, ScreenManager.GraphicsDevice);
     }
 
     public override void UnloadContent()
     {
         ScreenManager.Game.InactiveSleepTime = savedInactiveSleepTime;
-        ApplyFrameRate(new FrameRateSettings(savedIsFixedTimeStep, savedVSync, savedTargetElapsedTime));
+        ApplyGraphics(new FrameRateSettings(savedIsFixedTimeStep, savedVSync, savedTargetElapsedTime), savedDisplay);
 
         screensaver.UnloadContent();
         session.Dispose();
@@ -116,14 +129,20 @@ class ScreensaverScreen : GameScreen
         spriteBatch.End();
     }
 
-    private void ApplyFrameRate(FrameRateSettings settings)
+    private void ApplyGraphics(FrameRateSettings frameRate, DisplaySettings display)
     {
         Game game = ScreenManager.Game;
         GraphicsDeviceManager graphics = game.Services.GetService<GraphicsDeviceManager>();
 
-        game.IsFixedTimeStep = settings.IsFixedTimeStep;
-        game.TargetElapsedTime = settings.TargetElapsedTime;
-        graphics.SynchronizeWithVerticalRetrace = settings.VSync;
+        game.IsFixedTimeStep = frameRate.IsFixedTimeStep;
+        game.TargetElapsedTime = frameRate.TargetElapsedTime;
+        graphics.SynchronizeWithVerticalRetrace = frameRate.VSync;
+
+        graphics.HardwareModeSwitch = display.HardwareModeSwitch;
+        graphics.IsFullScreen = display.IsFullScreen;
+        graphics.PreferredBackBufferWidth = display.BackBufferSize.X;
+        graphics.PreferredBackBufferHeight = display.BackBufferSize.Y;
+
         graphics.ApplyChanges();
     }
 

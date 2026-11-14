@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using PCWarmer.Core.Stress;
 
 namespace PCWarmer.Core.Screensavers
 {
@@ -14,27 +15,28 @@ namespace PCWarmer.Core.Screensavers
     {
         public const string DefaultId = "particle-storm";
 
-        private static readonly (ScreensaverEntry Entry, Func<IScreensaver> Create)[] All =
+        private static readonly (ScreensaverEntry Entry, Func<StressLevel, IScreensaver> Create)[] All =
         {
-            (new ScreensaverEntry(DefaultId, "Particle Storm"), () => new ParticleStormScreensaver()),
-            (new ScreensaverEntry("embers", "Embers"), () => new EmbersScreensaver()),
-            (new ScreensaverEntry("starfield", "Starfield"), () => new StarfieldScreensaver()),
-            (new ScreensaverEntry("bouncing-orbs", "Bouncing Orbs"), () => new BouncingOrbsScreensaver()),
+            (new ScreensaverEntry(DefaultId, "Particle Storm"), level => new ParticleStormScreensaver(level)),
+            (new ScreensaverEntry("embers", "Embers"), level => new EmbersScreensaver(level)),
+            (new ScreensaverEntry("starfield", "Starfield"), level => new StarfieldScreensaver(level)),
+            (new ScreensaverEntry("bouncing-orbs", "Bouncing Orbs"), level => new BouncingOrbsScreensaver(level)),
         };
 
         /// <summary>The screensavers in the order the picker lists them.</summary>
         public static IReadOnlyList<ScreensaverEntry> Entries { get; } = All.Select(s => s.Entry).ToArray();
 
         /// <summary>A new screensaver for <paramref name="id"/>; unknown or null ids get the default.</summary>
-        public static IScreensaver Create(string id)
+        /// <param name="level">Sets how many particles it draws.</param>
+        public static IScreensaver Create(string id, StressLevel level = StressLevel.Medium)
         {
             foreach (var (entry, create) in All)
             {
                 if (entry.Id == id)
-                    return create();
+                    return create(level);
             }
 
-            return new ParticleStormScreensaver();
+            return new ParticleStormScreensaver(level);
         }
     }
 }

@@ -8,6 +8,14 @@ namespace PCWarmer.Tests.Settings;
 [TestFixture]
 public class SettingChoicesTests
 {
+    [TestCase(HardwareLoad.Custom, ExpectedResult = HardwareLoad.None)]
+    [TestCase(HardwareLoad.None, ExpectedResult = HardwareLoad.Low)]
+    [TestCase(HardwareLoad.Low, ExpectedResult = HardwareLoad.Medium)]
+    [TestCase(HardwareLoad.Medium, ExpectedResult = HardwareLoad.High)]
+    [TestCase(HardwareLoad.High, ExpectedResult = HardwareLoad.Custom)]
+    [TestCase((HardwareLoad)42, ExpectedResult = HardwareLoad.Custom)]
+    public HardwareLoad NextHardwareLoad_CyclesInMenuOrder(HardwareLoad load) => SettingChoices.NextHardwareLoad(load);
+
     [TestCase(StressLevel.Low, ExpectedResult = StressLevel.Medium)]
     [TestCase(StressLevel.Medium, ExpectedResult = StressLevel.High)]
     [TestCase(StressLevel.High, ExpectedResult = StressLevel.Low)]

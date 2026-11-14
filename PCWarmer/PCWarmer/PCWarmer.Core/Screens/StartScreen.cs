@@ -5,7 +5,7 @@ namespace PCWarmer.Screens;
 
 /// <summary>
 /// The first screen PCWarmer shows. Its main button starts warming the room: it opens the screensaver
-/// picker, which asks for confirmation and then runs the CPU and GPU load.
+/// picker, where the hardware load (and, for Custom, the settings) is chosen.
 /// </summary>
 class StartScreen : MenuScreen
 {
@@ -13,15 +13,12 @@ class StartScreen : MenuScreen
         : base("PCWarmer")
     {
         MenuEntry warmMenuEntry = new MenuEntry("Start");
-        MenuEntry settingsMenuEntry = new MenuEntry(Resources.Settings);
         MenuEntry exitMenuEntry = new MenuEntry(Resources.Exit);
 
         warmMenuEntry.Selected += WarmMenuEntrySelected;
-        settingsMenuEntry.Selected += (sender, e) => ScreenManager.AddScreen(new SettingsScreen(), e.PlayerIndex);
         exitMenuEntry.Selected += OnCancel;
 
         MenuEntries.Add(warmMenuEntry);
-        MenuEntries.Add(settingsMenuEntry);
         MenuEntries.Add(exitMenuEntry);
     }
 

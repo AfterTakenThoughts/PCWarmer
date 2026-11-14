@@ -10,11 +10,17 @@ namespace PCWarmer.Core.Settings;
 /// </summary>
 public static class SettingChoices
 {
+    private static readonly HardwareLoad[] HardwareLoadSteps =
+        { HardwareLoad.Custom, HardwareLoad.None, HardwareLoad.Low, HardwareLoad.Medium, HardwareLoad.High };
+
     private static readonly StressLevel[] CpuLoadSteps = { StressLevel.Low, StressLevel.Medium, StressLevel.High };
     private static readonly FpsCap[] FpsCapSteps = { FpsCap.Fps30, FpsCap.Fps60, FpsCap.Fps144, FpsCap.Uncapped };
 
     /// <summary>0 means unlimited.</summary>
     private static readonly int[] DurationSteps = { 0, 15, 30, 60, 120 };
+
+    /// <summary>The next hardware load in menu order (Custom, None, Low, Medium, High); an unknown value restarts at Custom.</summary>
+    public static HardwareLoad NextHardwareLoad(HardwareLoad load) => Next(HardwareLoadSteps, load);
 
     /// <summary>The next CPU load level (Low, Medium, High, then Low again); an unknown value restarts at Low.</summary>
     public static StressLevel NextCpuLoad(StressLevel level) => Next(CpuLoadSteps, level);

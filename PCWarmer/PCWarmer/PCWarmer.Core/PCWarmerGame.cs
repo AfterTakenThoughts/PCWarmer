@@ -57,7 +57,11 @@ namespace PCWarmer.Core
 
             // Initialize settings and leaderboard managers.
             settingsManager = new SettingsManager<PCWarmerSettings>(storage);
-            graphicsDeviceManager.IsFullScreen = settingsManager.Settings.FullScreen;
+
+            // The menus always run in a window; only the screensaver goes full screen (see ScreensaverDisplay).
+            // Never switch the monitor's resolution: that resizes the user's other windows.
+            graphicsDeviceManager.HardwareModeSwitch = false;
+            graphicsDeviceManager.IsFullScreen = false;
             Services.AddService(typeof(SettingsManager<PCWarmerSettings>), settingsManager);
 
             leaderboardManager = new SettingsManager<PCWarmerLeaderboard>(storage);

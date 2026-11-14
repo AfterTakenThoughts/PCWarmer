@@ -21,6 +21,7 @@ public class PCWarmerSettings : INotifyPropertyChanged
     private FpsCap fpsCap = FpsCap.Fps60;
     private int durationMinutes = 30;
     private int cpuThreads;
+    private HardwareLoad hardwareLoad = HardwareLoad.Medium;
 
     /// <summary>
     /// Gets or sets whether the game is in full-screen mode.
@@ -108,6 +109,27 @@ public class PCWarmerSettings : INotifyPropertyChanged
     {
         get => cpuThreads;
         set => SetField(ref cpuThreads, value);
+    }
+
+    /// <summary>The hardware load picked on the screensaver screen. Only Custom uses the options on the settings screen.</summary>
+    public HardwareLoad HardwareLoad
+    {
+        get => hardwareLoad;
+        set => SetField(ref hardwareLoad, value);
+    }
+
+    /// <summary>
+    /// Puts every option on the settings screen back to its default. Language isn't on that screen, so it's kept.
+    /// </summary>
+    public void ResetToDefaults()
+    {
+        var defaults = new PCWarmerSettings();
+
+        CpuLoad = defaults.CpuLoad;
+        FpsCap = defaults.FpsCap;
+        DurationMinutes = defaults.DurationMinutes;
+        CpuThreads = defaults.CpuThreads;
+        FullScreen = defaults.FullScreen;
     }
 
     private void SetField<T>(ref T field, T value, [CallerMemberName] string propertyName = null)

@@ -6,11 +6,11 @@ Imagine you need to warm up your house. Your heaters aren't working well and the
 
 PCWarmer holds a series of graphically intensive screensavers, with frame rate options to warm up your GPU, and a series of intensive calculations to warm up your CPU.
 
-> **Status:** in development for HackUMass XIV. The screensavers, CPU load, intensity presets and the start screen work; temperature readings are still planned.
+It is not strictly designed for warming up a home - this is also designed for people who wants to stress test their computer, or simply use the screensaver when idling.
 
 ## Before using this software
 
-PCWarmer is specifically designed to push a computer to its absolute limits. Before running it:
+PCWarmer has a series of options made specifically to push a computer to its absolute limits. Before running it on high computer loads:
 
 - Make sure your computer has good airflow.
 - Keep an eye on temperatures and make sure your computer can handle running hot.

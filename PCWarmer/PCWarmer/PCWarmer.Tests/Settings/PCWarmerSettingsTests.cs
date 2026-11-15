@@ -136,4 +136,51 @@ public class PCWarmerSettingsTests
 
         Assert.That(settings.HardwareLoad, Is.EqualTo(HardwareLoad.Custom));
     }
+
+    [Test]
+    public void NewSettings_PickParticleStormAtMediumDetail()
+    {
+        var settings = new PCWarmerSettings();
+
+        Assert.That(settings.ScreensaverId, Is.EqualTo("particle-storm"));
+        Assert.That(settings.ScreensaverLevel, Is.EqualTo(StressLevel.Medium));
+        Assert.That(settings.FpsCap, Is.EqualTo(FpsCap.Fps60));
+    }
+
+    [Test]
+    public void FileWithoutNewFields_LoadsWithDefaults()
+    {
+        var settings = JsonSerializer.Deserialize<PCWarmerSettings>("""{"FpsCap":0,"HardwareLoad":2}""")!;
+
+        Assert.That(settings.ScreensaverId, Is.EqualTo("particle-storm"));
+        Assert.That(SettingChoices.FpsCapOrDefault(settings.FpsCap), Is.EqualTo(FpsCap.Fps60));
+    }
+
+    [Test]
+    public void NewFields_SurviveSaveAndLoad()
+    {
+        var saved = new PCWarmerSettings { ScreensaverId = "embers", ScreensaverLevel = StressLevel.High };
+
+        var loaded = JsonSerializer.Deserialize<PCWarmerSettings>(JsonSerializer.Serialize(saved))!;
+
+        Assert.That(loaded.ScreensaverId, Is.EqualTo("embers"));
+        Assert.That(loaded.ScreensaverLevel, Is.EqualTo(StressLevel.High));
+    }
+
+    [Test]
+    public void ResetToDefaults_ResetsDetailButKeepsScreensaverAndIntensity()
+    {
+        var settings = new PCWarmerSettings
+        {
+            ScreensaverLevel = StressLevel.High,
+            ScreensaverId = "embers",
+            HardwareLoad = HardwareLoad.High,
+        };
+
+        settings.ResetToDefaults();
+
+        Assert.That(settings.ScreensaverLevel, Is.EqualTo(StressLevel.Medium));
+        Assert.That(settings.ScreensaverId, Is.EqualTo("embers"));
+        Assert.That(settings.HardwareLoad, Is.EqualTo(HardwareLoad.High));
+    }
 }

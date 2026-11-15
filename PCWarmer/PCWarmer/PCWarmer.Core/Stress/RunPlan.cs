@@ -4,11 +4,11 @@ using PCWarmer.Core.Settings;
 
 namespace PCWarmer.Core.Stress
 {
-    /// <summary>Everything a warming run needs, worked out from the picked hardware load and the saved settings.</summary>
+    /// <summary>Everything a warming run needs, worked out from the picked intensity and the saved settings.</summary>
     /// <param name="CpuDutyCycle">Fraction of each time window the CPU workers spend busy; 0 means no CPU load at all.</param>
     /// <param name="CpuThreads">CPU worker threads; 0 means one per core.</param>
     /// <param name="FpsCap">The screensaver's frame-rate cap.</param>
-    /// <param name="ScreensaverLevel">Sets how many particles the screensaver draws.</param>
+    /// <param name="ScreensaverLevel">Sets how many particles, stars or orbs the screensaver draws.</param>
     /// <param name="Duration">How long the run lasts; null means unlimited.</param>
     /// <param name="FullScreen">Whether the screensaver covers the screen.</param>
     public sealed record RunPlan(
@@ -20,26 +20,33 @@ namespace PCWarmer.Core.Stress
         bool FullScreen)
     {
         /// <summary>
-        /// None, Low, Medium and High are presets that ignore the settings screen (duration and display use the defaults).
-        /// Custom uses the settings screen's options. An unknown load runs like Medium.
+        /// None, Low, Medium and High are presets that set the CPU load, threads, frame rate and screensaver detail.
+        /// Custom uses the saved Custom options. Every intensity takes its run length and display mode from the saved
+        /// settings. An unknown intensity runs like Medium.
         /// </summary>
-        public static RunPlan For(HardwareLoad load, PCWarmerSettings settings)
+        /// <param name="cores">The machine's core count (<see cref="Environment.ProcessorCount"/> in production).</param>
+        public static RunPlan For(HardwareLoad load, PCWarmerSettings settings, int cores)
         {
             ArgumentNullException.ThrowIfNull(settings);
 
-            return load switch
+            TimeSpan? duration = SettingChoices.RunDuration(settings.DurationMinutes);
+            bool fullScreen = settings.FullScreen;
+            cores = Math.Max(1, cores);
+
+            return SettingChoices.HardwareLoadOrDefault(load) switch
             {
                 HardwareLoad.Custom => new RunPlan(
-                    StressProfile.For(SettingChoices.CpuLoadOrDefault(settings.CpuLoad)).CpuDutyCycle,
+                    StressProfile.For(SettingChoices.LevelOrDefault(settings.CpuLoad)).CpuDutyCycle,
                     settings.CpuThreads,
-                    settings.FpsCap,
-                    StressLevel.Medium,
-                    SettingChoices.RunDuration(settings.DurationMinutes),
-                    settings.FullScreen),
-                HardwareLoad.None => Preset(cpuDutyCycle: 0, FpsCap.Fps30, StressLevel.Low),
-                HardwareLoad.Low => Preset(StressLevel.Low, FpsCap.Fps30),
-                HardwareLoad.High => Preset(StressLevel.High, FpsCap.Uncapped),
-                _ => Preset(StressLevel.Medium, FpsCap.Fps60),
+                    SettingChoices.FpsCapOrDefault(settings.FpsCap),
+                    SettingChoices.LevelOrDefault(settings.ScreensaverLevel),
+                    duration,
+                    fullScreen),
+                HardwareLoad.None => new RunPlan(0, 0, FpsCap.Fps60, StressLevel.Low, duration, fullScreen),
+                HardwareLoad.Low => Preset(StressLevel.Low, Math.Max(1, cores / 2), FpsCap.Fps60, duration, fullScreen),
+                HardwareLoad.High => Preset(StressLevel.High, cores, FpsCap.Uncapped, duration, fullScreen),
+                // Three-quarters of the cores, rounded down, leaves at least one free for other apps on 2+ cores.
+                _ => Preset(StressLevel.Medium, Math.Max(1, cores * 3 / 4), FpsCap.Fps120, duration, fullScreen),
             };
         }
 
@@ -47,19 +54,7 @@ namespace PCWarmer.Core.Stress
         public ICpuLoad CreateCpuLoad()
             => CpuDutyCycle > 0 ? new CpuStressService(CpuThreads) : new NoCpuLoad();
 
-        private static RunPlan Preset(StressLevel level, FpsCap fpsCap)
-            => Preset(StressProfile.For(level).CpuDutyCycle, fpsCap, level);
-
-        private static RunPlan Preset(double cpuDutyCycle, FpsCap fpsCap, StressLevel screensaverLevel)
-        {
-            var defaults = new PCWarmerSettings();
-            return new RunPlan(
-                cpuDutyCycle,
-                CpuThreads: 0,
-                fpsCap,
-                screensaverLevel,
-                SettingChoices.RunDuration(defaults.DurationMinutes),
-                defaults.FullScreen);
-        }
+        private static RunPlan Preset(StressLevel level, int threads, FpsCap fpsCap, TimeSpan? duration, bool fullScreen)
+            => new(StressProfile.For(level).CpuDutyCycle, threads, fpsCap, level, duration, fullScreen);
     }
 }

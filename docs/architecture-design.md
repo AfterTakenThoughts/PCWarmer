@@ -4,7 +4,7 @@
 
 **Goal:** Replace the MonoGame platformer template with a stress engine that heats the room by loading the CPU (worker threads) and the GPU (screensavers), with CPU load, frame-rate, duration and thread-count options.
 
-**Status:** Tasks 1–6 are done. Task 7 (removing the platformer template) is still open. Part 2 records what each task built and where it differs from the original plan. The [roadmap](roadmap.md) tracks open work.
+**Status:** Tasks 1–7 are done. The UI redesign that followed is in [the UI design](superpowers/specs/2026-11-15-ui-redesign-design.md). Part 2 records what each task built and where it differs from the original plan. The [roadmap](roadmap.md) tracks open work.
 
 **Architecture:** Keep the existing shared core (`PCWarmer.Core`) plus thin platform heads (DesktopGL and WindowsDX), the screen stack and settings persistence. A `Stress/` module holds the CPU worker threads and a session that owns timing. A `Screensavers/` module holds pluggable GPU loads hosted by one `GameScreen`. All load logic that doesn't need a `GraphicsDevice` lives in plain classes so `PCWarmer.Tests` can test it.
 
@@ -68,7 +68,7 @@ Screens/
 6. **Settings extend the existing `PCWarmerSettings` POCO.** Values are always sanitized where they are used (`SettingChoices`, `StressProfile.For`, `FrameRatePolicy.For`, `ScreensaverCatalog.Create`, the `CpuStressService` thread clamp), so an old or hand-edited JSON file can never crash the app.
 7. **The screensaver is picked for each run, not saved.** `ScreensaverPickerScreen` lists `ScreensaverCatalog.Entries`, so there is no `ScreensaverId` setting.
 8. **Screensavers currently run at the Medium GPU profile.** `ScreensaverCatalog.Create` uses each screensaver's default `StressLevel.Medium`, so the CPU load setting changes the CPU duty cycle but not the particle rate, star count or orb count.
-9. **The platformer code is to be deleted (Task 7, open).** DesktopGL and WindowsDX are both supported. The Android and iOS heads have been removed.
+9. **The platformer code is archived (Task 7, done).** It was moved to `PCWarmer/PCWarmer/Archive/` (not compiled) rather than deleted. DesktopGL and WindowsDX are both supported. The Android and iOS heads have been removed.
 
 ### Stress levels
 
@@ -228,19 +228,14 @@ The plan was a single `StressMenuScreen` reached from the template's main menu. 
 
 ---
 
-### Task 7: Remove the platformer template (open)
+### Task 7: Remove the platformer template (done)
 
-`StartScreen` replaced `MainMenuScreen` at startup, so the template's screens are no longer reachable but are still in the build.
+The template's code and content were moved to `PCWarmer/PCWarmer/Archive/` instead of being deleted, keeping their original folder layout so a file can be moved back. Nothing there is compiled or built; [Archive/README.md](../PCWarmer/PCWarmer/Archive/README.md) lists what each file was.
 
-**Files:**
-- Delete: `PCWarmer.Core/Game/` (whole folder), `Screens/GameplayScreen.cs`, `Screens/EndOfLevelMessageState.cs`, `Screens/PauseScreen.cs`, `Screens/MainMenuScreen.cs`, `Screens/LoadingScreen.cs`, `Screens/AboutScreen.cs` (only reachable from `MainMenuScreen`), `Settings/PCWarmerLeaderboard.cs`.
-- Delete content and its `PCWarmer.mgcb` entries: `Levels/`, `Tiles/`, `Overlays/`, the player, monster and gem sprites, the backgrounds other than `Backgrounds/Layer0_2`, and the gameplay-only sounds (`MonsterKilled`, `PlayerExitReached`, `PlayerFall`, `PlayerGemCollected`, `PlayerJump`, `PlayerKilled`, `PlayerPowerUp`). Keep `Backgrounds/Layer0_2` (`BackgroundScreen`), `Sprites/blank`, `Sprites/gradient`, `Fonts/Hud` and anything else the menus or screensavers load. Decide whether `Sounds/Music.mp3` stays.
-- Modify: `PCWarmerGame.cs` (remove the leaderboard manager and its service registration).
-- Modify: `CLAUDE.md` (describe the new modules, and remove the notes about the placeholder gameplay code and the leaderboard).
+**Archived code:** `PCWarmer.Core/Game/` (whole folder), `Screens/GameplayScreen.cs`, `EndOfLevelMessageState.cs`, `PauseScreen.cs`, `MainMenuScreen.cs`, `LoadingScreen.cs`, `AboutScreen.cs`, the template's text menus and message box (`MenuScreen`, `MenuEntry`, `MessageBoxScreen`, `YesNoButtons`), `Inputs/TouchCollectionExtensions.cs`, `Settings/PCWarmerLeaderboard.cs`, `Settings/ConsoleSettingsStorage.cs` and `Stress/DivergentSeries.cs`, plus the tests for `YesNoButtons` and `DivergentSeries`.
 
-**Interfaces:** none new.
+**Archived content** (and removed from `PCWarmer.mgcb`): `Backgrounds/`, `Levels/`, `Overlays/`, `Sounds/` (including `Music.mp3`), `Tiles/`, and every sprite except `Sprites/blank.png`. The template's `Fonts/Hud.spritefont` and `Roboto-Bold.ttf` were archived too: `ScreenManager` loaded them but nothing drew with them, so its unused `Font` property was removed. `PCWarmer.mgcb` now lists only the Inter fonts with their licence, and `Sprites/blank.png`. The app icons stay in `Content/`.
 
-- [ ] **Step 1: Delete the files and remove the references** listed above.
-- [ ] **Step 2: Run `dotnet test PCWarmer.Tests/PCWarmer.Tests.csproj`.** Expected: everything builds and all tests pass. Then run `dotnet build PCWarmer.DesktopGL/PCWarmer.DesktopGL.csproj` on a desktop machine. Expected: no new warnings about removed types.
-- [ ] **Step 3: Run `dotnet run --project PCWarmer.DesktopGL`** on a desktop machine. Expected: the app starts with no `ContentLoadException`, and the start screen, Settings and a full warming run all work.
-- [ ] **Step 4: Commit** with `refactor: remove platformer template code and content`.
+**Changed:** `PCWarmerGame.cs` no longer creates or registers the leaderboard manager. `CLAUDE.md` describes the archive.
+
+**Checked:** `dotnet test` passes, and an MGCB build of the trimmed `PCWarmer.mgcb` builds all 4 assets. Still to check on a desktop machine: `dotnet run --project PCWarmer.DesktopGL` starts with no `ContentLoadException`, and a full warming run works.

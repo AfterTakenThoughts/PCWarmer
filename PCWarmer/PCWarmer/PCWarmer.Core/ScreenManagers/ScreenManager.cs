@@ -27,7 +27,6 @@ public class ScreenManager : DrawableGameComponent
 
     // Shared resources for drawing and content management.
     private SpriteBatch spriteBatch;
-    private SpriteFont font;
     private Texture2D blankTexture;
 
     private bool isInitialized;
@@ -53,11 +52,6 @@ public class ScreenManager : DrawableGameComponent
     /// Provides access to a shared SpriteBatch instance for drawing operations.
     /// </summary>
     public SpriteBatch SpriteBatch => spriteBatch;
-
-    /// <summary>
-    /// Provides access to a shared SpriteFont instance for text rendering.
-    /// </summary>
-    public SpriteFont Font => font;
 
     /// <summary>
     /// Enables or disables screen tracing for debugging purposes.
@@ -90,7 +84,6 @@ public class ScreenManager : DrawableGameComponent
     {
         ContentManager content = Game.Content;
         spriteBatch = new SpriteBatch(GraphicsDevice);
-        font = content.Load<SpriteFont>("Fonts/Hud");
         blankTexture = content.Load<Texture2D>("Sprites/blank");
 
         foreach (GameScreen screen in screens)

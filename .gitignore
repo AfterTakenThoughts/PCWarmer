@@ -63,3 +63,6 @@ monodroid*.msi
 *.VC.opendb
 
 artifacts/
+
+# Superpowers brainstorming mockups and plan scratch files
+.superpowers/

@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using PCWarmer.Core.Ui;
 
 namespace PCWarmer.Screens;
 
@@ -11,8 +12,6 @@ namespace PCWarmer.Screens;
 /// </summary>
 class BackgroundScreen : GameScreen
 {
-    ContentManager content;
-    Texture2D backgroundTexture;
 
     /// <summary>
     /// Initializes a new instance of the BackgroundScreen class.
@@ -30,10 +29,6 @@ class BackgroundScreen : GameScreen
     /// </summary>
     public override void LoadContent()
     {
-        if (content == null)
-            content = new ContentManager(ScreenManager.Game.Services, "Content");
-
-        backgroundTexture = content.Load<Texture2D>("Backgrounds/Layer0_2");
     }
 
     /// <summary>
@@ -41,7 +36,6 @@ class BackgroundScreen : GameScreen
     /// </summary>
     public override void UnloadContent()
     {
-        content.Unload();
     }
 
     /// <summary>
@@ -64,17 +58,7 @@ class BackgroundScreen : GameScreen
     /// <param name="gameTime">Provides a snapshot of timing values.</param>
     public override void Draw(GameTime gameTime)
     {
-        // Clear the screen to black to prevent visual artifacts.
-        ScreenManager.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0, 0);
-
-        SpriteBatch spriteBatch = ScreenManager.SpriteBatch;
-        Rectangle fullscreen = new Rectangle(0, 0, (int)ScreenManager.BaseScreenSize.X, (int)ScreenManager.BaseScreenSize.Y);
-
-        spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, ScreenManager.GlobalTransformation);
-
-        // Draw the background texture with the current transition alpha.
-        spriteBatch.Draw(backgroundTexture, fullscreen, new Color(TransitionAlpha, TransitionAlpha, TransitionAlpha));
-
-        spriteBatch.End();
+        // A plain dark background behind every menu, fading with the screen transition.
+        ScreenManager.GraphicsDevice.Clear(Color.Lerp(Color.Black, UiTheme.Background, TransitionAlpha));
     }
 }

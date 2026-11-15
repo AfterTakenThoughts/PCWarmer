@@ -7,18 +7,18 @@ Keeps a list of in-progress items and items that should be done. Finished items 
 ### User items:
 
 - Build a settings screen (separately)
+	- The UI redesign folded the settings screen into the start screen: run length and display sit under the Start button, and the other options open under Intensity when Custom is picked. The temperature limits below would go in those Custom options.
 	- Still to do: max CPU temperature and max GPU temperature.
 		- They need temperature readings first. On Windows, GPU temperature on NVIDIA can come from `nvidia-smi` (no admin). CPU temperature needs a library such as LibreHardwareMonitorLib and running as administrator.
 		- Decide what the limits do: only show the numbers, or also stop warming when a reading goes over its limit.
-- Improve the UI with certain animated assets.
-- Use a better button design.
+- Add the ignition animation (later goal, when there's spare hackathon time)
+	- When a run starts, the Start button's glow flares and the dashboard gauges sweep up from zero, like an engine catching. Left out of the [UI redesign](superpowers/specs/2026-11-15-ui-redesign-design.md) on purpose.
 
 ### Claude items:
 
 Engine work from [architecture-design.md](architecture-design.md) that the screens above build on. The screens themselves (start, settings and screensaver) stay in the user items.
 
-- Remove the platformer template (Task 7)
-	- Delete `Game/`, `GameplayScreen`, the leaderboard and the level content, then update `CLAUDE.md`.
+- Nothing open right now.
 
 ## Done
 
@@ -35,6 +35,14 @@ Engine work from [architecture-design.md](architecture-design.md) that the scree
 - Add a hardware load option to the screensaver selection screen: Custom, None, Low, Medium, High
 	- None, Low, Medium and High are presets for CPU load, frame rate and screensaver particles (`RunPlan`, with tests); Custom uses the settings screen.
 	- The settings button moved from the start screen to the screensaver select screen, and only shows when "Custom" is selected.
+- Redesign the UI ([design](superpowers/specs/2026-11-15-ui-redesign-design.md), [plan](superpowers/plans/2026-11-15-ui-redesign.md))
+	- Covers the two roadmap items "Improve the UI with certain animated assets" and "Use a better button design".
+	- One start screen replaces the start, screensaver picker and settings screens. On the left: the "PCWarmer" title, Intensity (None, Low, Medium, High, Custom), the Custom options when picked, the screensaver tiles, and an Exit button. On the right: a big, round, glowing red Start button that pulses slowly and never moves or changes size, with Run length, Display and Reset settings under it.
+	- Dark charcoal background, one red accent (Start, "Yes, start" and the gauge arcs), rounded dark buttons and the Inter font. Built with Myra.
+	- Presets: None runs only the screensaver (no CPU load, no confirm box); Low is 25% CPU on half the cores at 60 fps; Medium is 60% on three-quarters of the cores at 120 fps; High is 100% on all cores, uncapped. Frame-rate choices are now 60 / 120 / Uncapped.
+	- The "Really warm your room?" box is a dark rounded panel with a red "Yes, start" button.
+	- While warming, a gauge dashboard (CPU load and FPS) shows for a few seconds, then fades; moving the mouse brings it back, and any key, click or gamepad button stops the run.
+	- Every run keeps the display and PC awake.
 - Build the screensaver screen
 	- `ScreensaverScreen` hosts `ParticleStormScreensaver` with a HUD (FPS, level, CPU load and threads, particles, time warming). Any key, click or gamepad button stops the run. It keeps rendering when the window is unfocused.
 	- Uses the saved CPU load, threads, duration and frame-rate cap. It ends on its own when the duration is up.
@@ -61,3 +69,8 @@ Engine work from [architecture-design.md](architecture-design.md) that the scree
 - Build the screensaver engine (Task 5, everything except `ScreensaverScreen`)
 	- `IScreensaver`, `ScreensaverCatalog`, `EmissionBudget`, `FrameCounter` and the first screensaver, `ParticleStormScreensaver`.
 	- Plus Embers, Starfield and Bouncing Orbs. Tests are in `EmissionBudgetTests`, `FrameCounterTests`, `ScreensaverCatalogTests`, `EmberFieldTests`, `StarfieldTests` and `OrbFieldTests`.
+- Build the UI redesign's engine pieces
+	- `RunPlan` presets and `RunConfirmation`, `StartMenuModel` (focus and values for the start screen), keep-awake (`WindowsKeepAwake`, `SdlKeepAwake`), `GaugeScale`, `ShapeMasks`, `UiScale`, `MouseGate` and `DeferredActions`, all tested without a GPU.
+	- Old settings files still load: the old 30 fps becomes 60 and the old 144 becomes 120.
+- Remove the platformer template (Task 7)
+	- The template's code, its tests, the leaderboard and the unused content (levels, tiles, sprites, backgrounds, sounds) were moved to `PCWarmer/PCWarmer/Archive/`, which isn't compiled or built. `PCWarmer.mgcb` now lists only the Inter fonts and `Sprites/blank.png`.

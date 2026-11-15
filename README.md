@@ -6,7 +6,7 @@ Imagine you need to warm up your house. Your heaters aren't working well and the
 
 PCWarmer holds a series of graphically intensive screensavers, with frame rate options to warm up your GPU, and a series of intensive calculations to warm up your CPU.
 
-> **Status:** in development for HackUMass XIV. The app currently builds and runs from the MonoGame starter template; the features below are the plan.
+> **Status:** in development for HackUMass XIV. The screensavers, CPU load, intensity presets and the start screen work; temperature readings are still planned.
 
 ## Before using this software
 
@@ -32,9 +32,9 @@ This software comes with no warranty (see [LICENSE](LICENSE)). If you actually n
    ```
 
    The first build downloads the MonoGame content tools, so it can take a minute.
-3. *(Optional)* Open **Settings** to change the CPU load, frame-rate cap, run length, CPU threads or display mode. The defaults are Medium load, 60 fps, a 30-minute run, all CPU cores and full screen.
-4. Choose **Start**, pick a screensaver (Particle Storm, Embers, Starfield or Bouncing Orbs), and confirm.
-5. Press any key to stop. The run also stops on its own when the run length is up.
+3. On the start screen, pick an **Intensity** (None, Low, Medium, High or Custom) and a screensaver (Particle Storm, Embers, Starfield or Bouncing Orbs). Custom opens extra options for CPU load, screensaver detail, CPU threads and frame rate. Run length and Display sit under the Start button. The defaults are Medium intensity, Particle Storm, a 30-minute run and full screen.
+4. Press the big red **Start** button and confirm. None only runs the screensaver, so it starts straight away.
+5. Move the mouse to see the dashboard, and press any key to stop. The run also stops on its own when the run length is up.
 
 See [Running the project](#running-the-project) for VS Code launch configurations and Release builds.
 

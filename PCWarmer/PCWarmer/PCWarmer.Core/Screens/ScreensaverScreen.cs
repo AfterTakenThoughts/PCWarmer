@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -9,21 +8,17 @@ using PCWarmer.Core.Display;
 using PCWarmer.Core.Inputs;
 using PCWarmer.Core.Screensavers;
 using PCWarmer.Core.Stress;
+using PCWarmer.Core.Ui;
 
 namespace PCWarmer.Screens;
 
 /// <summary>
-/// Shows a screensaver while a warming run loads the CPU, with a HUD of what the run is doing.
-/// H, gamepad Y or the Hide UI button hide the HUD (and the mouse cursor) so it looks like a real screensaver; a
-/// "Press any key to show UI" hint shows for a few seconds, then fades out. While hidden, any key, click or button shows
-/// the HUD again. With the HUD showing, any other key, click or button stops the run and returns to the previous screen;
-/// so does the run's time running out. Hiding isn't remembered: every run starts with the HUD showing.
+/// Shows a screensaver while a warming run loads the CPU, with a dashboard of what the run is doing. The dashboard shows
+/// for a few seconds, then fades out so only the screensaver is on screen; moving the mouse brings it back. Any key,
+/// click or gamepad button stops the run and returns to the previous screen; so does the run's time running out.
 /// </summary>
 class ScreensaverScreen : GameScreen
 {
-    private const string HideButtonText = "Hide UI (H)";
-    private const int HideButtonPadding = 6;
-    private const string ShowUiHint = "Press any key to show UI";
 
     private static readonly Buttons[] WatchedButtons =
     {
@@ -34,15 +29,14 @@ class ScreensaverScreen : GameScreen
     private readonly IScreensaver screensaver;
     private readonly FpsCap fpsCap;
     private readonly bool fullScreen;
+    private readonly IKeepAwake keepAwake;
     private readonly FrameCounter frameCounter = new();
-    private readonly StringBuilder hud = new();
     private readonly List<Keys> newKeys = new();
     private readonly List<Buttons> newButtons = new();
 
-    private Texture2D blankTexture;
-    private bool hudVisible = true;
-    private readonly HintFade showUiHint = new(hold: TimeSpan.FromSeconds(3), fade: TimeSpan.FromSeconds(1));
-    private Rectangle hideButtonBounds;
+    private readonly HintFade dashboardFade = new(hold: TimeSpan.FromSeconds(3), fade: TimeSpan.FromSeconds(1));
+    private bool firstInputFrame = true;
+    private Dashboard dashboard;
     private bool savedIsMouseVisible;
 
     private ContentManager content;
@@ -56,12 +50,14 @@ class ScreensaverScreen : GameScreen
     /// <param name="screensaver">The graphics load to show. This screen loads and unloads it.</param>
     /// <param name="fpsCap">The frame-rate cap while this screen is open. The previous frame rate comes back when it closes.</param>
     /// <param name="fullScreen">Whether to cover the screen (borderless, at the desktop resolution) while this screen is open.</param>
-    public ScreensaverScreen(StressSession session, IScreensaver screensaver, FpsCap fpsCap, bool fullScreen)
+    /// <param name="keepAwake">Keeps the display and PC awake while this screen is open.</param>
+    public ScreensaverScreen(StressSession session, IScreensaver screensaver, FpsCap fpsCap, bool fullScreen, IKeepAwake keepAwake)
     {
         this.session = session ?? throw new ArgumentNullException(nameof(session));
         this.screensaver = screensaver ?? throw new ArgumentNullException(nameof(screensaver));
         this.fpsCap = fpsCap;
         this.fullScreen = fullScreen;
+        this.keepAwake = keepAwake ?? throw new ArgumentNullException(nameof(keepAwake));
 
         TransitionOnTime = TimeSpan.FromSeconds(0.5);
         TransitionOffTime = TimeSpan.FromSeconds(0.5);
@@ -78,7 +74,6 @@ class ScreensaverScreen : GameScreen
 
         // Keep rendering at full speed when the window loses focus: that's when people leave it running.
         savedIsMouseVisible = game.IsMouseVisible;
-        blankTexture = content.Load<Texture2D>("Sprites/blank");
 
         savedInactiveSleepTime = game.InactiveSleepTime;
         game.InactiveSleepTime = TimeSpan.Zero;
@@ -98,10 +93,15 @@ class ScreensaverScreen : GameScreen
 
         // Load after the display change, so the screensaver lays itself out for the full-screen size.
         screensaver.LoadContent(content, ScreenManager.GraphicsDevice);
+        dashboard = new Dashboard(game.Services.GetService<UiFonts>(), ScreenManager.GraphicsDevice);
+
+        keepAwake.Begin();
+        dashboardFade.Show();
     }
 
     public override void UnloadContent()
     {
+        keepAwake.End();
         ScreenManager.Game.InactiveSleepTime = savedInactiveSleepTime;
         ScreenManager.Game.IsMouseVisible = savedIsMouseVisible;
         ApplyGraphics(new FrameRateSettings(savedIsFixedTimeStep, savedVSync, savedTargetElapsedTime), savedDisplay);
@@ -118,7 +118,8 @@ class ScreensaverScreen : GameScreen
         // Update the screensaver and session first: when the fade-out ends, base.Update removes this screen,
         // which unloads the screensaver and disposes the session.
         screensaver.Update(gameTime);
-        showUiHint.Update(gameTime.ElapsedGameTime);
+        dashboardFade.Update(gameTime.ElapsedGameTime);
+        ScreenManager.Game.IsMouseVisible = dashboardFade.Opacity > 0;
 
         session.Update();
         if (!session.IsRunning && !IsExiting)
@@ -133,17 +134,17 @@ class ScreensaverScreen : GameScreen
             return;
 
         CollectNewPresses(inputState);
-        Vector2? click = NewClick(inputState);
+        MouseState mouse = inputState.CurrentMouseState;
+        MouseState lastMouse = inputState.LastMouseState;
 
-        switch (ScreensaverInput.Decide(newKeys, newButtons, click, hudVisible, hideButtonBounds))
+        // The click or movement that started the run isn't a request to show the dashboard.
+        Vector2 mouseDelta = firstInputFrame ? Vector2.Zero : new Vector2(mouse.X - lastMouse.X, mouse.Y - lastMouse.Y);
+        firstInputFrame = false;
+
+        switch (ScreensaverInput.Decide(newKeys, newButtons, NewClick(inputState), mouseDelta))
         {
-            case ScreensaverAction.ToggleHud:
-                hudVisible = !hudVisible;
-                ScreenManager.Game.IsMouseVisible = hudVisible;
-                if (hudVisible)
-                    showUiHint.Hide();
-                else
-                    showUiHint.Show();
+            case ScreensaverAction.ShowDashboard:
+                dashboardFade.Show();
                 break;
 
             case ScreensaverAction.Stop:
@@ -162,47 +163,13 @@ class ScreensaverScreen : GameScreen
         SpriteBatch spriteBatch = ScreenManager.SpriteBatch;
         screensaver.Draw(spriteBatch, gameTime);
 
-        if (hudVisible)
-            DrawHud(spriteBatch);
-        else if (showUiHint.Opacity > 0)
-            DrawShowUiHint(spriteBatch);
-    }
-
-    private void DrawShowUiHint(SpriteBatch spriteBatch)
-    {
-        SpriteFont font = ScreenManager.Font;
-        Viewport viewport = ScreenManager.GraphicsDevice.Viewport;
-        Vector2 size = font.MeasureString(ShowUiHint);
-        var position = new Vector2((viewport.Width - size.X) / 2, (viewport.Height - size.Y) / 2);
-
-        spriteBatch.Begin();
-        spriteBatch.DrawString(font, ShowUiHint, position, Color.White * (showUiHint.Opacity * TransitionAlpha));
-        spriteBatch.End();
-    }
-
-    private void DrawHud(SpriteBatch spriteBatch)
-    {
-        SpriteFont font = ScreenManager.Font;
-        Color textColor = Color.White * TransitionAlpha;
-
-        string text = BuildHud();
-        var textPosition = new Vector2(16, 16);
-        Vector2 textSize = font.MeasureString(text);
-
-        // The Hide UI button sits under the HUD text, in window pixels (no menu scaling), like the mouse position.
-        Vector2 labelSize = font.MeasureString(HideButtonText);
-        hideButtonBounds = new Rectangle(
-            (int)textPosition.X,
-            (int)(textPosition.Y + textSize.Y + 8),
-            (int)labelSize.X + HideButtonPadding * 2,
-            (int)labelSize.Y + HideButtonPadding * 2);
-
-        spriteBatch.Begin();
-        spriteBatch.DrawString(font, text, textPosition, textColor);
-        spriteBatch.Draw(blankTexture, hideButtonBounds, new Color(230, 110, 30) * (0.85f * TransitionAlpha));
-        spriteBatch.DrawString(font, HideButtonText,
-            new Vector2(hideButtonBounds.X + HideButtonPadding, hideButtonBounds.Y + HideButtonPadding), textColor);
-        spriteBatch.End();
+        float opacity = dashboardFade.Opacity * TransitionAlpha;
+        if (opacity > 0)
+        {
+            Viewport viewport = ScreenManager.GraphicsDevice.Viewport;
+            dashboard.Draw(spriteBatch, viewport, opacity, UiScale.For(new Point(viewport.Width, viewport.Height)),
+                session.CpuDutyCycle, frameCounter.Fps, fpsCap, session.Remaining, session.CpuThreads, screensaver.LiveParticles);
+        }
     }
 
     private void ApplyGraphics(FrameRateSettings frameRate, DisplaySettings display)
@@ -221,29 +188,6 @@ class ScreensaverScreen : GameScreen
 
         graphics.ApplyChanges();
     }
-
-    private string BuildHud()
-    {
-        hud.Clear();
-        hud.Append("FPS: ").Append(frameCounter.Fps.ToString("0")).AppendLine();
-        hud.Append("Frame rate cap: ").Append(FpsCapText(fpsCap)).AppendLine();
-        hud.Append("CPU load: ").Append((session.CpuDutyCycle * 100).ToString("0")).Append("% on ")
-           .Append(session.CpuThreads).AppendLine(" threads");
-        hud.Append("Particles: ").Append(screensaver.LiveParticles).AppendLine();
-        hud.Append("Warming for: ").Append(session.Elapsed.ToString(@"hh\:mm\:ss")).AppendLine();
-        hud.Append("Time left: ").Append(session.Remaining is { } left ? left.ToString(@"hh\:mm\:ss") : "Unlimited").AppendLine();
-        hud.Append("Press H to hide this, any other key to stop");
-        return hud.ToString();
-    }
-
-    /// <summary>How a frame-rate cap reads in menus and the HUD.</summary>
-    public static string FpsCapText(FpsCap cap) => cap switch
-    {
-        FpsCap.Fps30 => "30",
-        FpsCap.Fps144 => "144",
-        FpsCap.Uncapped => "Uncapped",
-        _ => "60",
-    };
 
     /// <summary>
     /// Fills <see cref="newKeys"/> and <see cref="newButtons"/> with what went down this frame. A key still held
@@ -267,14 +211,13 @@ class ScreensaverScreen : GameScreen
         }
     }
 
-    /// <summary>Where a left or right click went down this frame, in window pixels; null if none. Moving the mouse doesn't count.</summary>
-    private static Vector2? NewClick(InputState input)
+    /// <summary>Whether a left or right click went down this frame. Moving the mouse doesn't count.</summary>
+    private static bool NewClick(InputState input)
     {
         MouseState current = input.CurrentMouseState;
         MouseState last = input.LastMouseState;
 
-        bool clicked = IsNewClick(current.LeftButton, last.LeftButton) || IsNewClick(current.RightButton, last.RightButton);
-        return clicked ? new Vector2(current.X, current.Y) : null;
+        return IsNewClick(current.LeftButton, last.LeftButton) || IsNewClick(current.RightButton, last.RightButton);
     }
 
     private static bool IsNewClick(ButtonState current, ButtonState last)

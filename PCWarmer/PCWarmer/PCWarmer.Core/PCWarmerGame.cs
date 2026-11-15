@@ -4,6 +4,8 @@ using System.Globalization;
 using PCWarmer.Core.Effects;
 using PCWarmer.Core.Localization;
 using PCWarmer.Core.Settings;
+using PCWarmer.Core.Ui;
+using Myra;
 using PCWarmer.ScreenManagers;
 using PCWarmer.Screens;
 using Microsoft.Xna.Framework;
@@ -30,8 +32,6 @@ namespace PCWarmer.Core
         // Manages game settings, such as preferences and configurations.
         private SettingsManager<PCWarmerSettings> settingsManager;
 
-        // Manages leaderboard data for tracking high scores and achievements.
-        private SettingsManager<PCWarmerLeaderboard> leaderboardManager;
 
         // Texture for rendering particles.
         private Texture2D particleTexture;
@@ -41,7 +41,7 @@ namespace PCWarmer.Core
 
         /// <summary>
         /// Initializes a new instance of the game. Configures desktop settings,
-        /// initializes services like settings and leaderboard managers, and sets up the
+        /// initializes the settings manager service, and sets up the
         /// screen manager for screen transitions.
         /// </summary>
         public PCWarmerGame()
@@ -55,7 +55,7 @@ namespace PCWarmer.Core
             ISettingsStorage storage = new DesktopSettingsStorage();
             IsMouseVisible = true;
 
-            // Initialize settings and leaderboard managers.
+            // Initialize the settings manager.
             settingsManager = new SettingsManager<PCWarmerSettings>(storage);
 
             // The menus always run in a window; only the screensaver goes full screen (see ScreensaverDisplay).
@@ -63,9 +63,6 @@ namespace PCWarmer.Core
             graphicsDeviceManager.HardwareModeSwitch = false;
             graphicsDeviceManager.IsFullScreen = false;
             Services.AddService(typeof(SettingsManager<PCWarmerSettings>), settingsManager);
-
-            leaderboardManager = new SettingsManager<PCWarmerLeaderboard>(storage);
-            Services.AddService(typeof(SettingsManager<PCWarmerLeaderboard>), leaderboardManager);
 
             Content.RootDirectory = "Content";
 
@@ -83,6 +80,11 @@ namespace PCWarmer.Core
         /// </summary>
         protected override void Initialize()
         {
+            // Myra lays out and draws the menus and reads the mouse. Keyboard and gamepad go through InputState,
+            // so Myra is told no keys are ever down.
+            MyraEnvironment.Game = this;
+            MyraEnvironment.DownKeysGetter = keys => System.Array.Clear(keys, 0, keys.Length);
+
             base.Initialize();
 
             // Load supported languages and set the default language.
@@ -113,6 +115,11 @@ namespace PCWarmer.Core
 
             // Share the particle manager as a service.
             Services.AddService(typeof(ParticleManager), particleManager);
+
+            // The menus' font, shared by every Myra screen and the warming dashboard.
+            using (var regular = TitleContainer.OpenStream("Content/Fonts/Inter-Regular.ttf"))
+            using (var semiBold = TitleContainer.OpenStream("Content/Fonts/Inter-SemiBold.ttf"))
+                Services.AddService(typeof(UiFonts), new UiFonts(regular, semiBold));
         }
     }
 }

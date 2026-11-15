@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using PCWarmer.Core.Display;
 using PCWarmer.Core.Effects;
+using PCWarmer.Core.Screensavers;
 using PCWarmer.Core.Stress;
 
 namespace PCWarmer.Core.Settings;
@@ -22,6 +23,8 @@ public class PCWarmerSettings : INotifyPropertyChanged
     private int durationMinutes = 30;
     private int cpuThreads;
     private HardwareLoad hardwareLoad = HardwareLoad.Medium;
+    private string screensaverId = ScreensaverCatalog.DefaultId;
+    private StressLevel screensaverLevel = StressLevel.Medium;
 
     /// <summary>
     /// Gets or sets whether the game is in full-screen mode.
@@ -118,6 +121,20 @@ public class PCWarmerSettings : INotifyPropertyChanged
         set => SetField(ref hardwareLoad, value);
     }
 
+    /// <summary>The screensaver picked on the start screen, by catalog id. Unknown ids run the default (see SettingChoices.ScreensaverIdOrDefault).</summary>
+    public string ScreensaverId
+    {
+        get => screensaverId;
+        set => SetField(ref screensaverId, value);
+    }
+
+    /// <summary>How much the screensaver draws (particles, stars or orbs) when the intensity is Custom.</summary>
+    public StressLevel ScreensaverLevel
+    {
+        get => screensaverLevel;
+        set => SetField(ref screensaverLevel, value);
+    }
+
     /// <summary>
     /// Puts every option on the settings screen back to its default. Language isn't on that screen, so it's kept.
     /// </summary>
@@ -130,6 +147,7 @@ public class PCWarmerSettings : INotifyPropertyChanged
         DurationMinutes = defaults.DurationMinutes;
         CpuThreads = defaults.CpuThreads;
         FullScreen = defaults.FullScreen;
+        ScreensaverLevel = defaults.ScreensaverLevel;
     }
 
     private void SetField<T>(ref T field, T value, [CallerMemberName] string propertyName = null)

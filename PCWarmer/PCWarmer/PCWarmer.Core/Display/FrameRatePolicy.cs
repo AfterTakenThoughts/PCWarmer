@@ -16,8 +16,7 @@ namespace PCWarmer.Core.Display
         /// </summary>
         public static FrameRateSettings For(FpsCap cap) => cap switch
         {
-            FpsCap.Fps30 => Capped(30),
-            FpsCap.Fps144 => Capped(144),
+            FpsCap.Fps120 => Capped(120),
             FpsCap.Uncapped => new FrameRateSettings(false, false, FrameTime(60)),
             _ => Capped(60),
         };

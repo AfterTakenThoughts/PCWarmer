@@ -25,7 +25,6 @@ class MainMenuScreen : MenuScreen
     private SettingsManager<PCWarmerSettings> settingsManager;
     private MenuEntry playMenuEntry;
     private MenuEntry tutorialMenuEntry;
-    private MenuEntry settingsMenuEntry;
     private MenuEntry aboutMenuEntry;
     private MenuEntry exitMenuEntry;
     private Texture2D gradientTexture;
@@ -42,21 +41,18 @@ class MainMenuScreen : MenuScreen
         // Create our menu entries.
         playMenuEntry = new MenuEntry(Resources.Play);
         tutorialMenuEntry = new MenuEntry(Resources.Tutorial);
-        settingsMenuEntry = new MenuEntry(Resources.Settings);
         aboutMenuEntry = new MenuEntry(Resources.About);
         exitMenuEntry = new MenuEntry(Resources.Exit);
 
         // Hook up menu event handlers.
         playMenuEntry.Selected += PlayMenuEntrySelected;
         tutorialMenuEntry.Selected += TutorialMenuEntrySelected;
-        settingsMenuEntry.Selected += SettingsMenuEntrySelected;
         aboutMenuEntry.Selected += AboutMenuEntrySelected;
         exitMenuEntry.Selected += OnCancel;
 
         // Add entries to the menu.
         MenuEntries.Add(playMenuEntry);
         MenuEntries.Add(tutorialMenuEntry);
-        MenuEntries.Add(settingsMenuEntry);
         MenuEntries.Add(aboutMenuEntry);
         MenuEntries.Add(exitMenuEntry);
     }
@@ -65,7 +61,6 @@ class MainMenuScreen : MenuScreen
     {
         aboutMenuEntry.Text = Resources.About;
         playMenuEntry.Text = Resources.Play;
-        settingsMenuEntry.Text = Resources.Settings;
         tutorialMenuEntry.Text = Resources.Tutorial;
         exitMenuEntry.Text = Resources.Exit;
 
@@ -282,14 +277,6 @@ class MainMenuScreen : MenuScreen
         // You could create another screen and show the tutorial there.
         // But modern games, have a more dynamic main menu
         showTutorial = true;
-    }
-
-    /// <summary>
-    /// Event handler for when the Options menu entry is selected.
-    /// </summary>
-    void SettingsMenuEntrySelected(object sender, PlayerIndexEventArgs e)
-    {
-        ScreenManager.AddScreen(new SettingsScreen(), e.PlayerIndex);
     }
 
     /// <summary>

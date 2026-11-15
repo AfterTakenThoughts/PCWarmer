@@ -6,9 +6,8 @@ namespace PCWarmer.Tests.Display;
 [TestFixture]
 public class FrameRatePolicyTests
 {
-    [TestCase(FpsCap.Fps30, 333_333L)]
     [TestCase(FpsCap.Fps60, 166_666L)]
-    [TestCase(FpsCap.Fps144, 69_444L)]
+    [TestCase(FpsCap.Fps120, 83_333L)]
     public void Capped_UsesFixedStepAtTheCapWithoutVSync(FpsCap cap, long frameTicks)
         => Assert.That(FrameRatePolicy.For(cap),
             Is.EqualTo(new FrameRateSettings(IsFixedTimeStep: true, VSync: false, TimeSpan.FromTicks(frameTicks))));
@@ -22,8 +21,9 @@ public class FrameRatePolicyTests
         Assert.That(settings.VSync, Is.False);
     }
 
-    [Test]
-    public void UndefinedCap_FallsBackTo60()
-        => Assert.That(FrameRatePolicy.For((FpsCap)42),
+    [TestCase(0)]   // the old Fps30
+    [TestCase(42)]
+    public void UndefinedCap_FallsBackTo60(int raw)
+        => Assert.That(FrameRatePolicy.For((FpsCap)raw),
             Is.EqualTo(new FrameRateSettings(true, false, TimeSpan.FromTicks(166_666L))));
 }

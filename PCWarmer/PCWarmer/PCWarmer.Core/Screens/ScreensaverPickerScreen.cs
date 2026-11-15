@@ -8,7 +8,7 @@ using PCWarmer.Core.Stress;
 namespace PCWarmer.Screens;
 
 /// <summary>
-/// Picks the hardware load and the screensaver. The hardware load is None, Low, Medium, High (presets) or Custom,
+/// Two sections: "Select Computer Load" and "Select a Screensaver". The hardware load is None, Low, Medium, High (presets) or Custom,
 /// which shows a Settings entry for the custom options. Picking a screensaver asks the user to confirm, then starts
 /// the run. When the run ends, the user is back on the start screen.
 /// </summary>
@@ -22,7 +22,7 @@ class ScreensaverPickerScreen : MenuScreen
     private PCWarmerSettings Settings => settingsManager.Settings;
 
     public ScreensaverPickerScreen()
-        : base("Choose a Screensaver")
+        : base(string.Empty)
     {
         hardwareLoadMenuEntry.Selected += (sender, e) =>
         {
@@ -32,7 +32,11 @@ class ScreensaverPickerScreen : MenuScreen
         };
         settingsMenuEntry.Selected += (sender, e) => ScreenManager.AddScreen(new SettingsScreen(), e.PlayerIndex);
 
+        MenuEntries.Add(new MenuHeading("Select Computer Load"));
         MenuEntries.Add(hardwareLoadMenuEntry);
+
+        MenuEntries.Add(new MenuHeading(string.Empty));
+        MenuEntries.Add(new MenuHeading("Select a Screensaver"));
 
         foreach (ScreensaverEntry entry in ScreensaverCatalog.Entries)
         {
@@ -58,7 +62,7 @@ class ScreensaverPickerScreen : MenuScreen
     private void RefreshHardwareLoad()
     {
         HardwareLoad load = Settings.HardwareLoad;
-        hardwareLoadMenuEntry.Text = $"Hardware Load: {(Enum.IsDefined(load) ? load : HardwareLoad.Medium)}";
+        hardwareLoadMenuEntry.Text = $"Hardware Load: {HardwareLoadText(load)}";
 
         bool showSettings = load == HardwareLoad.Custom;
         bool settingsShown = MenuEntries.Contains(settingsMenuEntry);
@@ -69,6 +73,13 @@ class ScreensaverPickerScreen : MenuScreen
         else if (!showSettings && settingsShown)
             MenuEntries.Remove(settingsMenuEntry);
     }
+
+    private static string HardwareLoadText(HardwareLoad load) => load switch
+    {
+        HardwareLoad.None => "None (screensaver only)",
+        _ when Enum.IsDefined(load) => load.ToString(),
+        _ => HardwareLoad.Medium.ToString(),
+    };
 
     private void Confirm(ScreensaverEntry entry, PlayerIndexEventArgs e)
     {

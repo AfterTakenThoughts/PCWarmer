@@ -124,6 +124,10 @@ abstract class MenuScreen : GameScreen
     {
         for (int i = 0; i < menuEntries.Count; i++)
         {
+            // Headings and other disabled entries can't be clicked.
+            if (!menuEntries[i].Enabled)
+                continue;
+
             var textSize = ScreenManager.Font.MeasureString(menuEntries[i].Text);
             var entryBounds = new Rectangle((int)menuEntries[i].Position.X, (int)menuEntries[i].Position.Y, (int)textSize.X, (int)textSize.Y);
 
